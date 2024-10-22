@@ -23,6 +23,10 @@ class Grafo:
         """Agrega una arista si no existe ya en el grafo."""
         if not self.existe_arista(arista):
             self.aristas.add(arista)
+            arista.n1.aristas.add(arista)
+            arista.n2.aristas.add(arista)
+            return True
+        return False
 
     def guardar_graphviz(self, filename):
         """Guarda el grafo en formato .dot para usar con Graphviz."""
@@ -138,40 +142,46 @@ def grafoGeografico(n, r, dirigido=False):
 
     return grafo
 
-def grafoBarabasiAlbert(n, d, dirigido=False):
-    """Genera un grafo según el modelo Barabási-Albert."""
-    if n <= 0:
-        raise ValueError("El número de nodos debe ser mayor que 0.")
-    if d <= 1:
-        raise ValueError("El grado d debe ser mayor que 1.")
+def grafoBarabasiAlbert(n, d, dirigido=False, auto=False):
+    """
+    Genera un grafo aleatorio con el modelo Barabási-Albert
+    
+    """
+    if n < 1 or d < 2:
+        raise ValueError("Error: n > 0 y d > 1")
     
     grafo = Grafo(dirigido)
+    nodos_deg = dict()
     
-    # Inicializa un grafo completo de d nodos
-    nodos_iniciales = [Nodo(i) for i in range(d)]
-    for nodo in nodos_iniciales:
+    # Crear nodos
+    for nodo_id in range(n):
+        nodo = Nodo(nodo_id)
         grafo.agregar_nodo(nodo)
+        nodos_deg[nodo_id] = 0
     
-    # Crear un grafo completamente conectado para los nodos iniciales
-    for i in range(d):
-        for j in range(i + 1, d):
-            grafo.agregar_arista(Arista(nodos_iniciales[i], nodos_iniciales[j]))
+    nodos = grafo.nodos
+    
+    # Agregar aristas al azar, con cierta probabilidad
+    for nodo in nodos:
+        for v in nodos:
+            if nodos_deg[nodo.id] == d:
+                break
+            if nodos_deg[v.id] == d:
+                continue
+            p = random.random()
+            equal_nodes = v == nodo
+            if equal_nodes and not auto:
+                continue
 
-    # Agregar nodos uno por uno
-    for i in range(d, n):
-        nuevo_nodo = Nodo(i)
-        grafo.agregar_nodo(nuevo_nodo)
-
-        # Selección de nodos a conectar con el nuevo nodo, basada en grados
-        targets = set()
-        while len(targets) < d:
-            nodo_existente = random.choice(grafo.nodos)
-            targets.add(nodo_existente)
-
-        for target in targets:
-            grafo.agregar_arista(Arista(nuevo_nodo, target))
+            if p <= 1 - nodos_deg[v.id] / d and grafo.agregar_arista(Arista(nodo, v)):
+                nodos_deg[nodo.id] += 1
+                if not equal_nodes:
+                    nodos_deg[v.id] += 1
 
     return grafo
+
+
+
 
 def grafoDorogovtsevMendes(n, dirigido=False):
     """Genera un grafo según el modelo Dorogovtsev-Mendes."""

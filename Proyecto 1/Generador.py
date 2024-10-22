@@ -20,7 +20,7 @@ class GenGrafo:
         self.crear_y_mostrar_grafo(grafoErdosRenyi, "Erdös-Rényi", int(self.nodos * (self.nodos - 1) / 2 * 0.1))
         self.crear_y_mostrar_grafo(grafoGilbert, "Gilbert", 0.1)
         self.crear_y_mostrar_grafo(grafoGeografico, "Geográfico", 0.1)
-        self.crear_y_mostrar_grafo(grafoBarabasiAlbert, "Barabási-Albert", 2)
+        self.crear_y_mostrar_grafo(grafoBarabasiAlbert, "Barabási-Albert", 4)
         self.crear_y_mostrar_grafo(grafoDorogovtsevMendes, "Dorogovtsev-Mendes")
 
 def ejecutar_ejemplos():
