@@ -1,10 +1,13 @@
+
+# Clase Arista para representar las aristas del grafo.
 class Arista:
     def __init__(self, n1, n2):
-        self.n1 = n1
-        self.n2 = n2
-        self.atributos = []  # Lista de atributos
+        self.n1 = n1 # Nodo 1 conectado por la arista
+        self.n2 = n2 #Nodo 2 conectado por la arista
+        self.atributos = []  # Lista de atributos de la arista
 
     def __eq__(self, other):
+        #Compara dos aristas para verificar si son iguales
         return (self.n1.id == other.n1.id and self.n2.id == other.n2.id) or \
                (self.n1.id == other.n2.id and self.n2.id == other.n1.id)
 

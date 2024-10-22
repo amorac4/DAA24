@@ -3,33 +3,35 @@ import math
 from Snodo import Nodo
 from Sarista import Arista
 
+# Clase Grafo para representar un grafo con nodos y aristas.
 class Grafo:
     def __init__(self, dirigido=False):
-        self.nodos = []
-        self.aristas = set()
-        self.dirigido = dirigido
+        self.nodos = [] #lista  nodos en el grafo
+        self.aristas = set()#Conjunto de aristas en el grafo
+        self.dirigido = dirigido # Indiga si el grafo es dirigido o no
 
     def agregar_nodo(self, nodo):
+        # Agrega un nodo al grafo
         self.nodos.append(nodo)
 
     def existe_arista(self, arista):
-        """Verifica si la arista ya existe en el grafo."""
+        # Verifica si la arista ya existe en el grafo.
         if self.dirigido:
             return arista in self.aristas
         else:
             return arista in self.aristas or Arista(arista.n2, arista.n1) in self.aristas
 
     def agregar_arista(self, arista):
-        """Agrega una arista si no existe ya en el grafo."""
+        #Agrega una arista si no existe ya en el grafo
         if not self.existe_arista(arista):
             self.aristas.add(arista)
-            arista.n1.aristas.add(arista)
-            arista.n2.aristas.add(arista)
+            arista.n1.aristas.add(arista) #Añade la arista al nodo n1
+            arista.n2.aristas.add(arista) #Añade la arista al nodo n2
             return True
         return False
 
     def guardar_graphviz(self, filename):
-        """Guarda el grafo en formato .dot para usar con Graphviz."""
+        #Guarda el grafo en formato .dot para usar con Graphviz.
         with open(filename, 'w') as f:
             f.write("digraph G {\n" if self.dirigido else "graph G {\n")
             for arista in self.aristas:
@@ -40,15 +42,18 @@ class Grafo:
             f.write("}\n")
 
     def mostrar_grafo(self):
-        """Imprime la estructura del grafo."""
+        #imprime la estructuta del grafo, indicando si es dirigido o no, y el numero de nodos y aristas
         print(f"Grafo {'dirigido' if self.dirigido else 'no dirigido'} con {len(self.nodos)} nodos y {len(self.aristas)} aristas.")
 
 def generar_nodos(n, nombre_prefix="n"):
-    """Genera n nodos con un prefijo de nombre."""
+    #Genera n nodos con un prefijo de nombre.
+    #Retorna una lista de objetos Nodo con identificadores unicos.
     return [Nodo(f"{nombre_prefix}{i}") for i in range(n)]
 
+# Genera un grafo de malla de tamaño m x n.
+# Conecta cada nodo con sus vecinos inmediatos en una estructura rectangular.
 def grafoMalla(m, n, dirigido=False):
-    """Genera un grafo de malla de tamaño m x n."""
+    
     if m <= 1 or n <= 1:
         raise ValueError("Los valores de m y n deben ser mayores que 1.")
     
@@ -70,8 +75,10 @@ def grafoMalla(m, n, dirigido=False):
     
     return grafo
 
+# Genera un grafo aleatorio según el modelo Erdös-Rényi.
+# Crea n nodos y m aristas aleatorias.
 def grafoErdosRenyi(n, m, dirigido=False):
-    """Genera un grafo aleatorio según el modelo Erdös-Rényi."""
+
     if n <= 0:
         raise ValueError("El número de nodos debe ser mayor que 0.")
     if m < n - 1:
@@ -96,8 +103,11 @@ def grafoErdosRenyi(n, m, dirigido=False):
 
     return grafo
 
+
+# Genera un grafo aleatorio según el modelo Gilbert.
+# Crea un grafo donde cada par de nodos está conectado con una probabilidad p.
 def grafoGilbert(n, p, dirigido=False):
-    """Genera un grafo aleatorio según el modelo Gilbert."""
+    
     if n <= 0:
         raise ValueError("El número de nodos debe ser mayor que 0.")
     if not (0 < p < 1):
@@ -116,15 +126,18 @@ def grafoGilbert(n, p, dirigido=False):
 
     return grafo
 
+
+# Genera un grafo aleatorio según el modelo geográfico.
+# Conecta nodos que se encuentran dentro de una distancia r en un plano unitario.
 def grafoGeografico(n, r, dirigido=False):
-    """Genera un grafo aleatorio según el modelo geográfico."""
+    
     if n <= 0:
         raise ValueError("El número de nodos debe ser mayor que 0.")
     if not (0 < r <= 1):
         raise ValueError("La distancia r debe estar entre 0 y 1.")
     
     grafo = Grafo(dirigido)
-    posiciones = [(random.random(), random.random()) for _ in range(n)]
+    posiciones = [(random.random(), random.random()) for _ in range(n)] # Asigna posiciones aleatorias a los nodos.
     nodos = [Nodo(i) for i in range(n)]
     
     for nodo in nodos:
@@ -142,16 +155,16 @@ def grafoGeografico(n, r, dirigido=False):
 
     return grafo
 
+
+# Genera un grafo aleatorio con el modelo Barabási-Albert.
+# Cada nuevo nodo se conecta a d nodos ya existentes con una probabilidad proporcional al grado de los nodos existentes.
 def grafoBarabasiAlbert(n, d, dirigido=False, auto=False):
-    """
-    Genera un grafo aleatorio con el modelo Barabási-Albert
     
-    """
     if n < 1 or d < 2:
         raise ValueError("Error: n > 0 y d > 1")
     
     grafo = Grafo(dirigido)
-    nodos_deg = dict()
+    nodos_deg = dict() # Diccionario para llevar el conteo del grado de cada nodo.
     
     # Crear nodos
     for nodo_id in range(n):
@@ -182,9 +195,10 @@ def grafoBarabasiAlbert(n, d, dirigido=False, auto=False):
 
 
 
-
+# Genera un grafo según el modelo Dorogovtsev-Mendes.
+# Inicia con un triángulo y agrega nodos que se conectan a una arista existente.
 def grafoDorogovtsevMendes(n, dirigido=False):
-    """Genera un grafo según el modelo Dorogovtsev-Mendes."""
+    
     if n < 3:
         raise ValueError("El número de nodos debe ser al menos 3.")
     
@@ -195,6 +209,7 @@ def grafoDorogovtsevMendes(n, dirigido=False):
     for nodo in nodos_iniciales:
         grafo.agregar_nodo(nodo)
     
+    # Conectar los nodos iniciales en un triángulo.
     grafo.agregar_arista(Arista(nodos_iniciales[0], nodos_iniciales[1]))
     grafo.agregar_arista(Arista(nodos_iniciales[1], nodos_iniciales[2]))
     grafo.agregar_arista(Arista(nodos_iniciales[0], nodos_iniciales[2]))
