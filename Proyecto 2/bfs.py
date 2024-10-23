@@ -7,7 +7,7 @@ from collections import deque
 
 class BFS:
 
-    def __init__ (self graph):
+    def __init__ (self, graph):
         self.graph = graph
 
     def buscar(self, nodo_inicio):
