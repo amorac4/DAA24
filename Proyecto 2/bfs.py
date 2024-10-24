@@ -1,8 +1,5 @@
 from collections import deque
-#from Sarista import Arista
-#from Snodo import Nodo
-#from Sgrafo import Grafo
-#from Generador import GenGrafo
+
 
 
 class BFS:
@@ -15,6 +12,7 @@ class BFS:
         cola = deque([nodo_inicio])
         #iniciar un conjunto para almacenar los nosos visitados
         visitados = set([nodo_inicio])
+
 
         while cola:
             nodo_actual = cola.popleft()

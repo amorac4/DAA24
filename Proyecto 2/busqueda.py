@@ -1,16 +1,18 @@
 import sys
-import os
-
-proyecto_1_path = os.path.abspath(os.path.join(os.path.dirname(__file__),'../proyecto 1'))
-if proyecto_1_path not in sys.path:
-   sys.path.append(proyecto_1_path)
-
+sys.path.append("/home/verzzul/Escritorio/DAA24/Proyecto 1")
 
 from bfs import BFS
 from dfs_r import DFS_Recursivo
 from dfs_i import DFS_ITERATIVO
-from Sgrafo import grafoBarabasiAlbert, grafoDorogovtsevMendes, grafoErdosRenyi, grafoGeografico, grafoGilbert, grafoMalla
+from Sgrafo import  grafoBarabasiAlbert, grafoDorogovtsevMendes, grafoErdosRenyi, grafoGeografico, grafoGilbert, grafoMalla
 
+def resultados_busqueda(nombre, tipo_busqueda, nodos_visitados):
+    filename = f"Resultado de {tipo_busqueda}en el grafo: {nombre}.txt"
+    with open(filename, 'w') as f:
+        f.write(f"Resultado de {tipo_busqueda} en el grafo: {nombre}\n")
+        f.write("Nodos visitados en orden:\n")
+        for nodo in nodos_visitados:
+            f.write(f" {nodo.id}\n")
 
 def generar_grafos():
 
@@ -30,6 +32,7 @@ def generar_grafos():
 
 
 def iniciar_busqueda():
+
     grafos = generar_grafos()
 
 
@@ -45,7 +48,10 @@ def iniciar_busqueda():
 
     for nombre, grafo in grafos:
         print(f"\nGrafo generado: {nombre} con {len(grafo.nodos)} nodos")
-        grafo.mostrat_grafo()
+        
+        grafo.mostrar_grafo()
+
+        grafo.guardar_graphviz(f"{nombre}_generado.gv")
 
         nodo_inicio = grafo.nodos[0] if grafo.nodos else None
         if not nodo_inicio:
@@ -55,14 +61,17 @@ def iniciar_busqueda():
         print("\nBusqueda en amplitud(BFS):")
         bfs = BFS(grafo)
         bfs.buscar(nodo_inicio)
+        resultados_busqueda(nombre, "BFS", bfs.visitados)
 
         print("\nBusqueda en profundidad Recursiva (DFS RECURSIVO):")
         dfsR = DFS_Recursivo(grafo)
         dfsR.buscar(nodo_inicio)
+        resultados_busqueda(nombre, "DFS_R", dfsR.visitados)
 
-        print("\nBusqueda en profundidad iterativa(BFS ITERATIVO):")
+        print("\nBusqueda en profundidad iterativa(DFS ITERATIVO):")
         dfsI = DFS_ITERATIVO(grafo)
         dfsI.buscar(nodo_inicio)
+        resultados_busqueda(nombre, "DFS_I", dfsI.vsitados)
 
-        if __name__ == "__main__":
+if __name__ == "__main__":
             iniciar_busqueda()
