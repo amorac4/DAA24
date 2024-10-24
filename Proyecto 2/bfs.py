@@ -12,6 +12,7 @@ class BFS:
         cola = deque([nodo_inicio])
         #iniciar un conjunto para almacenar los nosos visitados
         visitados = set([nodo_inicio])
+        orden = [nodo_inicio]
 
 
         while cola:
@@ -23,6 +24,7 @@ class BFS:
                 if vecino not in visitados:
                     visitados.add(vecino)
                     cola.append(vecino)
-        return visitados
+                    orden.append(vecino)
+        return orden
 
 
