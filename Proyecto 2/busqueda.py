@@ -3,35 +3,28 @@ from bfs import BFS
 from dfs_r import DFS_Recursivo
 from dfs_i import DFS_ITERATIVO
 from Generador import GenGrafo
-
-def elegir_grafo():
-
-    print("\nSeleccione el tipo de grafo que desea generar:")
-    print("1. Grafo de Malla")
-    print("2. Grafo de Erdos-Reny")
-    print("3. Grafo de Gilbert")
-    print("4. Grafo de Geografico")
-    print("5. Grafo de Barabasi-Albert")
-    print("6. Grafo de Dorogovtsev-Mendes")
-
-    opcion= input ("Ingrese el numero de grafo")
-    return opcion
+from Sgrafo import grafoBarabasiAlbert, grafoDorogovtsevMendes, grafoErdosRenyi, grafoGeografico, grafoGilbert, grafoMalla
 
 
-def iniciar_busquda():
+def generar_grafos():
 
-    opcion = elegir_grafo()
+    nodo_list =[30, 100, 500]
+    grafos =[]
 
-    if opcion =='1':
 
-        filas = int(input("Ingrese el nuero de filas"))
-        columnas = int(input("Ingrese el nuero de columnas"))
-        generador = GenGrafo(filas*columnas)
-        grafo = generador.crear_y_mostrar_grafo(grafo_func=lambda n: grafoMalla(filas, columnas), nombre="Malla")
+    for nodos in nodo_list:
 
-    elif opcion =='2':
+        grafos.append(("Erdös-Rényi",grafoErdosRenyi(nodos, int(nodos*1.5))))
+        grafos.append(("Gilbert", grafoGilbert(nodos, 0.1)))
+        grafos.append(("Geografico", grafoGeografico(nodos, 0.2)))
+        grafos.append(("Barabási-Albert",grafoBarabasiAlbert(nodos, 4)))
+        grafos.append(("Dorogovtsev-Mendes", grafoDorogovtsevMendes(nodos)))
 
-        filas = int(input("Ingrese el nuero de filas"))
-        columnas = int(input("Ingrese el nuero de columnas"))
-        generador = GenGrafo(filas*columnas)
-        grafo = generador.crear_y_mostrar_grafo(grafo_func=lambda n: grafoMalla(filas, columnas), nombre="Malla")
+    return grafos
+
+
+
+
+
+
+
