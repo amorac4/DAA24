@@ -1,5 +1,6 @@
 import sys
 sys.path.append("/home/verzzul/Escritorio/DAA24/Proyecto 1")
+sys.path.append("E:\Maestria CIC\Cursos\Diseño y Analisis de Algoritmos\DAA24\Proyecto 1")
 
 from bfs import BFS
 from dfs_r import DFS_Recursivo
