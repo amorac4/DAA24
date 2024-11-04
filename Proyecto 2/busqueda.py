@@ -1,11 +1,7 @@
-import sys
-sys.path.append("/home/verzzul/Escritorio/DAA24/Proyecto 1")
-sys.path.append("E:\Maestria CIC\Cursos\Diseño y Analisis de Algoritmos\DAA24\Proyecto 1")
-
 from bfs import BFS
 from dfs_r import DFS_Recursivo
 from dfs_i import DFS_ITERATIVO
-from Sgrafo import  grafoBarabasiAlbert, grafoDorogovtsevMendes, grafoErdosRenyi, grafoGeografico, grafoGilbert, grafoMalla
+from Sgrafo import  Grafo, cargarG
 
 def resultados_busqueda(nombre, tipo_busqueda, nodos_visitados):
     filename = f"Resultado de {tipo_busqueda}en el grafo: {nombre}.txt"
@@ -72,7 +68,7 @@ def iniciar_busqueda():
         print("\nBusqueda en profundidad iterativa(DFS ITERATIVO):")
         dfsI = DFS_ITERATIVO(grafo)
         dfsI.buscar(nodo_inicio)
-        resultados_busqueda(nombre, "DFS_I", dfsI.vsitados)
+        resultados_busqueda(nombre, "DFS_I", dfsI.visitados)
 
 if __name__ == "__main__":
             iniciar_busqueda()

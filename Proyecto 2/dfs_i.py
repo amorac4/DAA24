@@ -1,4 +1,4 @@
-
+from Sgrafo import Grafo
 
 class DFS_ITERATIVO:
 
@@ -6,21 +6,18 @@ class DFS_ITERATIVO:
         self.graph
 
     def buscar (self, nodo_inicio):
-
+        arbol= Grafo(dirigido=self.dirigido)
+        if nodo_inicio not in self.nodos:
+          raise ValueError("El nodo de inicio no existe")
         pila = [nodo_inicio]
-        visitados = set()
-        orden =[]
+        visitados = {nodo_inicio}
+        arbol.agregar_nodo(nodo_inicio)
 
         while pila:
             nodo_actual = pila.pop()
-
-            if nodo_actual not in visitados:
-                visitados.add(nodo_actual)
-                orden.append(nodo_actual)
-                print(f"Visitado: {nodo_actual.id}")
-
-                for arista in reversed(nodo_actual.aristas):
-                    vecino = arista.n2 if arista.n1 == nodo_actual else arista.n1
-                    if vecino not in visitados:
-                        pila.append(vecino)
-            return orden
+            for vecino in self.vecinos(nodo_actual):
+                visitados.add(vecino.id)
+                pila.append(vecino.id)
+                arbol.agregar_nodo(vecino.id)
+                arbol.agregar_aristaA(nodo_actual, vecino.id)
+            return arbol

@@ -20,6 +20,8 @@ class Grafo:
             return arista in self.aristas
         else:
             return arista in self.aristas or Arista(arista.n2, arista.n1) in self.aristas
+    
+
 
     def agregar_arista(self, arista):
         #Agrega una arista si no existe ya en el grafo
@@ -29,6 +31,30 @@ class Grafo:
             arista.n2.aristas.add(arista) #Añade la arista al nodo n2
             return True
         return False
+
+    def agregar_aristaA (self, n1_id, n2_id):
+
+        if n1_id in self.nodos and n2_id in self.nodos:
+            arista = Arista(self.nodos[n1_id], self.nodos[n2_id])
+            if self.agregar_arista(arista):
+               self.nodos[n1_id].vecinos.add(self.nodos[n1_id])
+               if  not self.dirigido:
+                   self.nodos[n2_id].vecinos.add(self.nodos[n1_id])
+            else:
+             raise ValueError ("La arista existe.")
+ 
+        else:
+            raise ValueError("un nodo no exite")
+    
+
+    def vecinos(self, nodo):
+        nodoC =[]
+        for arista in self.aristas:
+            if arista.n1.id == nodo:
+                nodoC.append(arista.n1)
+            elif arista.n2.id == nodo:
+                nodoC.append(arista.n1)
+        return nodoC
 
     def guardar_graphviz(self, filename):
         #Guarda el grafo en formato .dot para usar con Graphviz.
@@ -44,6 +70,51 @@ class Grafo:
     def mostrar_grafo(self):
         #imprime la estructuta del grafo, indicando si es dirigido o no, y el numero de nodos y aristas
         print(f"Grafo {'dirigido' if self.dirigido else 'no dirigido'} con {len(self.nodos)} nodos y {len(self.aristas)} aristas.")
+    
+    def grado(self, nodo):
+        if nodo in self.nodos:
+            return len(nodo.aristas)
+        return 0
+def cargarG(archivo):
+ grafo = Grafo()
+ with open(archivo, 'r') as f:
+     lineas = f.readline()
+ nodos ={}
+
+ for linea in lineas:
+     linea = linea.strip()
+     if linea.startswith('"') and linea.endswith(';') and not ('--'in linea or '->'in linea):
+         nodo_id =linea.replace('"', '').replace(';','').strip()
+         nodo =Nodo(nodo_id)
+         grafo.agregar_nodo(nodo)
+         nodos[nodo_id]= nodo
+ for linea in lineas:
+     linea = linea.strip()
+     if '--' in linea or '->' in linea:
+         aux = linea.replace(';','').split()
+         n1_id = aux[0].strip().replace('"', '')
+         n2_id = aux[-1].strip().replace('"', '')
+
+         if n1_id in nodos and n2_id in nodos:
+             arista = Arista(nodos[n1_id]. nodos[n2_id])
+             if grafo.agregar_aristaA(nodos[n1_id], nodos[n2_id]):
+              print(f"Arista agregada: {n1_id} -- {n2_id}")
+             else:
+                 print(f"la arista entre {n1_id} y {n2_id}")
+     else:
+         print(f"no se encontraron nodos para  la arista {n1_id} <-> {n2_id}")
+
+ print(f"Aristas en el grafo: {[(arista.n1.id, arista.n2.id) for arista in grafo.aristas]}")
+ return grafo 
+def guardarArbol (grafo, nombre):
+    with open(nombre, 'w') as archivo:
+        archivo.write("graph G {\n")
+
+        for nodo in grafo.nodos.values():
+            for vecino in nodo.vecinos:
+                if nodo.id < vecino.id:
+                    archivo.write(f'"{nodo.id}" -- "{vecino.id}";\n')
+        archivo.write("}\n")
 
 def generar_nodos(n, nombre_prefix="n"):
     #Genera n nodos con un prefijo de nombre.
