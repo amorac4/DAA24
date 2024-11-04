@@ -32,24 +32,6 @@ class Grafo:
             return True
         return False
 
-    def agregar_aristaA(self, n1_id, n2_id):
-        # Convertimos la lista de nodos a un diccionario para buscar por ID
-        nodos_dict = {nodo.id: nodo for nodo in self.nodos}
-
-        if n1_id in nodos_dict and n2_id in nodos_dict:
-            nodo1 = nodos_dict[n1_id]
-            nodo2 = nodos_dict[n2_id]
-            arista = Arista(nodo1, nodo2)
-            if self.agregar_arista(arista):
-                nodo1.vecinos.add(nodo2)
-                if not self.dirigido:
-                    nodo2.vecinos.add(nodo1)
-            else:
-                raise ValueError("La arista ya existe.")
-        else:
-            raise ValueError("Un nodo no existe")
-    
-
     def vecinos(self, nodo):
         # Este método debe devolver una lista de nodos vecinos
         vecinos = []
