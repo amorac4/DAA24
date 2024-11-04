@@ -32,34 +32,42 @@ class Grafo:
             return True
         return False
 
-    def agregar_aristaA (self, n1_id, n2_id):
+    def agregar_aristaA(self, n1_id, n2_id):
+        # Convertimos la lista de nodos a un diccionario para buscar por ID
+        nodos_dict = {nodo.id: nodo for nodo in self.nodos}
 
-        if n1_id in self.nodos and n2_id in self.nodos:
-            arista = Arista(self.nodos[n1_id], self.nodos[n2_id])
+        if n1_id in nodos_dict and n2_id in nodos_dict:
+            nodo1 = nodos_dict[n1_id]
+            nodo2 = nodos_dict[n2_id]
+            arista = Arista(nodo1, nodo2)
             if self.agregar_arista(arista):
-               self.nodos[n1_id].vecinos.add(self.nodos[n1_id])
-               if  not self.dirigido:
-                   self.nodos[n2_id].vecinos.add(self.nodos[n1_id])
+                nodo1.vecinos.add(nodo2)
+                if not self.dirigido:
+                    nodo2.vecinos.add(nodo1)
             else:
-             raise ValueError ("La arista existe.")
- 
+                raise ValueError("La arista ya existe.")
         else:
-            raise ValueError("un nodo no exite")
+            raise ValueError("Un nodo no existe")
     
 
     def vecinos(self, nodo):
-        nodoC =[]
+        # Este método debe devolver una lista de nodos vecinos
+        vecinos = []
         for arista in self.aristas:
-            if arista.n1.id == nodo:
-                nodoC.append(arista.n1)
-            elif arista.n2.id == nodo:
-                nodoC.append(arista.n1)
-        return nodoC
+            if arista.n1 == nodo:
+                vecinos.append(arista.n2)
+            elif arista.n2 == nodo:
+                vecinos.append(arista.n1)
+        return vecinos
 
     def guardar_graphviz(self, filename):
         #Guarda el grafo en formato .dot para usar con Graphviz.
         with open(filename, 'w') as f:
             f.write("digraph G {\n" if self.dirigido else "graph G {\n")
+            nodoArista= {arista.n1.id for arista in self.aristas}.union({arista.n2.id for arista in self.aristas})
+            for nodo_id in nodoArista:
+                f.write(f'"{nodo_id}";\n')
+
             for arista in self.aristas:
                 if self.dirigido:
                     f.write(f'    "{arista.n1.id}" -> "{arista.n2.id}";\n')
@@ -76,36 +84,41 @@ class Grafo:
             return len(nodo.aristas)
         return 0
 def cargarG(archivo):
- grafo = Grafo()
- with open(archivo, 'r') as f:
-     lineas = f.readline()
- nodos ={}
+    grafo = Grafo()
+    nodos = {}
 
- for linea in lineas:
-     linea = linea.strip()
-     if linea.startswith('"') and linea.endswith(';') and not ('--'in linea or '->'in linea):
-         nodo_id =linea.replace('"', '').replace(';','').strip()
-         nodo =Nodo(nodo_id)
-         grafo.agregar_nodo(nodo)
-         nodos[nodo_id]= nodo
- for linea in lineas:
-     linea = linea.strip()
-     if '--' in linea or '->' in linea:
-         aux = linea.replace(';','').split()
-         n1_id = aux[0].strip().replace('"', '')
-         n2_id = aux[-1].strip().replace('"', '')
+    with open(archivo, 'r') as f:
+        lineas = f.readlines()  # Corregido: leer todas las líneas
 
-         if n1_id in nodos and n2_id in nodos:
-             arista = Arista(nodos[n1_id]. nodos[n2_id])
-             if grafo.agregar_aristaA(nodos[n1_id], nodos[n2_id]):
-              print(f"Arista agregada: {n1_id} -- {n2_id}")
-             else:
-                 print(f"la arista entre {n1_id} y {n2_id}")
-     else:
-         print(f"no se encontraron nodos para  la arista {n1_id} <-> {n2_id}")
+    # Procesar los nodos
+    for linea in lineas:
+        linea = linea.strip()
+        if linea.startswith('"') and linea.endswith(';') and not ('--' in linea or '->' in linea):
+            nodo_id = linea.replace('"', '').replace(';', '').strip()
+            nodo = Nodo(nodo_id)
+            grafo.agregar_nodo(nodo)
+            nodos[nodo_id] = nodo
 
- print(f"Aristas en el grafo: {[(arista.n1.id, arista.n2.id) for arista in grafo.aristas]}")
- return grafo 
+    # Procesar las aristas
+    for linea in lineas:
+        linea = linea.strip()
+        if '--' in linea or '->' in linea:
+            aux = linea.replace(';', '').split()
+            n1_id = aux[0].strip().replace('"', '')
+            n2_id = aux[-1].strip().replace('"', '')
+
+            if n1_id in nodos and n2_id in nodos:
+                arista = Arista(nodos[n1_id], nodos[n2_id])
+                if grafo.agregar_arista(arista):
+                    print(f"Arista agregada: {n1_id} -- {n2_id}")
+                else:
+                    print(f"La arista entre {n1_id} y {n2_id} ya existe.")
+            else:
+                print(f"No se encontraron nodos para la arista {n1_id} <-> {n2_id}")
+
+    print(f"Aristas en el grafo: {[(arista.n1.id, arista.n2.id) for arista in grafo.aristas]}")
+    return grafo
+
 def guardarArbol (grafo, nombre):
     with open(nombre, 'w') as archivo:
         archivo.write("graph G {\n")
