@@ -1,5 +1,6 @@
 import random
 import math
+import heapq
 from Snodo import Nodo
 from Sarista import Arista
 
@@ -19,7 +20,7 @@ class Grafo:
         if self.dirigido:
             return arista in self.aristas
         else:
-            return arista in self.aristas or Arista(arista.n2, arista.n1) in self.aristas
+            return arista in self.aristas or Arista(arista.n2, arista.n1, arista.peso) in self.aristas
     
 
 
@@ -51,10 +52,12 @@ class Grafo:
                 f.write(f'"{nodo_id}";\n')
 
             for arista in self.aristas:
+                peso = arista.peso  # Obtener el peso de la arista
+                distancia_redondeada = round(peso, 2)  # Redondear la distancia a 2 decimales
                 if self.dirigido:
-                    f.write(f'    "{arista.n1.id}" -> "{arista.n2.id}";\n')
+                    f.write(f'    "{arista.n1.id}" -> "{arista.n2.id}"[label="{distancia_redondeada}", len="{distancia_redondeada}"];\n')
                 else:
-                    f.write(f'    "{arista.n1.id}" -- "{arista.n2.id}";\n')
+                    f.write(f'    "{arista.n1.id}" -- "{arista.n2.id}"[label="{distancia_redondeada}", len="{distancia_redondeada}"];\n')
             f.write("}\n")
 
     def mostrar_grafo(self):
@@ -70,7 +73,7 @@ def cargarG(archivo):
     nodos = {}
 
     with open(archivo, 'r') as f:
-        lineas = f.readlines()  # Corregido: leer todas las líneas
+        lineas = f.readlines()
 
     # Procesar los nodos
     for linea in lineas:
@@ -85,21 +88,32 @@ def cargarG(archivo):
     for linea in lineas:
         linea = linea.strip()
         if '--' in linea or '->' in linea:
-            aux = linea.replace(';', '').split()
-            n1_id = aux[0].strip().replace('"', '')
-            n2_id = aux[-1].strip().replace('"', '')
+            # Extraer los IDs de los nodos y el peso, ignorando "len"
+            aux = linea.replace(';', '').split('[')
+            nodos_partes = aux[0].strip().split()
+            n1_id = nodos_partes[0].strip().replace('"', '')
+            n2_id = nodos_partes[-1].strip().replace('"', '')
+
+            # Extraer el peso
+            peso = 1  # Valor por defecto
+            if len(aux) > 1:
+                atributos = aux[1].replace(']', '').split(',')
+                for atributo in atributos:
+                    if 'label' in atributo:
+                        peso = float(atributo.split('=')[1].replace('"', '').strip())
 
             if n1_id in nodos and n2_id in nodos:
-                arista = Arista(nodos[n1_id], nodos[n2_id])
+                arista = Arista(nodos[n1_id], nodos[n2_id], peso)
                 if grafo.agregar_arista(arista):
-                    print(f"Arista agregada: {n1_id} -- {n2_id}")
+                    print(f"Arista agregada: {n1_id} -- {n2_id} con peso {peso}")
                 else:
                     print(f"La arista entre {n1_id} y {n2_id} ya existe.")
             else:
                 print(f"No se encontraron nodos para la arista {n1_id} <-> {n2_id}")
 
-    print(f"Aristas en el grafo: {[(arista.n1.id, arista.n2.id) for arista in grafo.aristas]}")
+    print(f"Aristas en el grafo: {[(arista.n1.id, arista.n2.id, arista.peso) for arista in grafo.aristas]}")
     return grafo
+
 
 def guardarArbol (grafo, nombre):
     with open(nombre, 'w') as archivo:
@@ -115,6 +129,41 @@ def generar_nodos(n, nombre_prefix="n"):
     #Genera n nodos con un prefijo de nombre.
     #Retorna una lista de objetos Nodo con identificadores unicos.
     return [Nodo(f"{nombre_prefix}{i}") for i in range(n)]
+
+def peso_arista(self, nodo1, nodo2):
+
+    for arista in self.aristas:
+        if(arista.n1 == nodo1 and arista.n2 == nodo2) or (arista.n1 == nodo2 and arista.n2 == nodo1):
+            return arista.peso
+    return float('inf')
+
+def dijkstra (self, nodo_inicio):
+    distancia = {nodo: float('inf') for nodo in self.nodos}
+    distancia[nodo_inicio] = 0
+
+    cola_prioridad = [(0, nodo_inicio)]
+    heapq.heapify(cola_prioridad)
+     
+    while cola_prioridad:
+      distancia_actual, nodo_actual = heapq.heappop(cola_prioridad)
+
+      if distancia_actual > distancia [nodo_actual]:
+          continue
+      for vecino in self.vecinos(nodo_actual):
+          peso = self.peso_arista(nodo_actual, vecino)
+          nueva_distancia = distancia_actual+ peso
+
+          if nueva_distancia < distancia[vecino]:
+           distancia[vecino] = nueva_distancia
+           heapq. heappush(cola_prioridad,(nueva_distancia, vecino))
+
+    return distancia
+
+
+
+    
+
+
 
 # Genera un grafo de malla de tamaño m x n.
 # Conecta cada nodo con sus vecinos inmediatos en una estructura rectangular.
@@ -133,11 +182,15 @@ def grafoMalla(m, n, dirigido=False):
             
             # Conectar con el nodo de abajo si no está en el borde inferior
             if i < m - 1:
-                grafo.agregar_arista(Arista(nodos[i][j], nodos[i + 1][j]))
+                peso = random.uniform(1,10)
+                
+                grafo.agregar_arista(Arista(nodos[i][j], nodos[i + 1][j],peso))
             
             # Conectar con el nodo a la derecha si no está en el borde derecho
             if j < n - 1:
-                grafo.agregar_arista(Arista(nodos[i][j], nodos[i][j + 1]))
+                peso = random.uniform(1,10)
+               
+                grafo.agregar_arista(Arista(nodos[i][j], nodos[i][j + 1], peso))
     
     return grafo
 
@@ -165,7 +218,8 @@ def grafoErdosRenyi(n, m, dirigido=False):
             aristas.add(tuple(sorted([n1, n2])))
 
     for n1, n2 in aristas:
-        grafo.agregar_arista(Arista(nodos[n1], nodos[n2]))
+        peso = random.uniform(1,10)
+        grafo.agregar_arista(Arista(nodos[n1], nodos[n2], peso))
 
     return grafo
 
@@ -188,7 +242,8 @@ def grafoGilbert(n, p, dirigido=False):
     for i in range(n):
         for j in range(i + 1, n):
             if random.random() < p:
-                grafo.agregar_arista(Arista(nodos[i], nodos[j]))
+                peso = random.uniform(1,10)
+                grafo.agregar_arista(Arista(nodos[i], nodos[j], peso))
 
     return grafo
 
@@ -214,9 +269,11 @@ def grafoGeografico(n, r, dirigido=False):
             distancia = math.sqrt((posiciones[i][0] - posiciones[j][0]) ** 2 +
                                   (posiciones[i][1] - posiciones[j][1]) ** 2)
             if distancia <= r:
-                grafo.agregar_arista(Arista(nodos[i], nodos[j]))
+                peso = random.uniform(1,10)
+                grafo.agregar_arista(Arista(nodos[i], nodos[j], peso))
                 if not dirigido:
-                    grafo.agregar_arista(Arista(nodos[j], nodos[i]))  # Agregar solo si el grafo es dirigido
+                    peso = random.uniform(1,10)
+                    grafo.agregar_arista(Arista(nodos[j], nodos[i], peso))  # Agregar solo si el grafo es dirigido
 
     return grafo
 
@@ -224,21 +281,20 @@ def grafoGeografico(n, r, dirigido=False):
 # Genera un grafo aleatorio con el modelo Barabási-Albert.
 # Cada nuevo nodo se conecta a d nodos ya existentes con una probabilidad proporcional al grado de los nodos existentes.
 def grafoBarabasiAlbert(n, d, dirigido=False, auto=False):
-    
     if n < 1 or d < 2:
         raise ValueError("Error: n > 0 y d > 1")
-    
+
     grafo = Grafo(dirigido)
-    nodos_deg = dict() # Diccionario para llevar el conteo del grado de cada nodo.
-    
+    nodos_deg = dict()  # Diccionario para llevar el conteo del grado de cada nodo.
+
     # Crear nodos
     for nodo_id in range(n):
         nodo = Nodo(nodo_id)
         grafo.agregar_nodo(nodo)
         nodos_deg[nodo_id] = 0
-    
+
     nodos = grafo.nodos
-    
+
     # Agregar aristas al azar, con cierta probabilidad
     for nodo in nodos:
         for v in nodos:
@@ -251,10 +307,12 @@ def grafoBarabasiAlbert(n, d, dirigido=False, auto=False):
             if equal_nodes and not auto:
                 continue
 
-            if p <= 1 - nodos_deg[v.id] / d and grafo.agregar_arista(Arista(nodo, v)):
-                nodos_deg[nodo.id] += 1
-                if not equal_nodes:
-                    nodos_deg[v.id] += 1
+            if p <= 1 - nodos_deg[v.id] / d:
+                peso = random.uniform(1, 10)  # Genera un peso aleatorio entre 1 y 10
+                if grafo.agregar_arista(Arista(nodo, v, peso)):
+                    nodos_deg[nodo.id] += 1
+                    if not equal_nodes:
+                        nodos_deg[v.id] += 1
 
     return grafo
 
@@ -275,9 +333,9 @@ def grafoDorogovtsevMendes(n, dirigido=False):
         grafo.agregar_nodo(nodo)
     
     # Conectar los nodos iniciales en un triángulo.
-    grafo.agregar_arista(Arista(nodos_iniciales[0], nodos_iniciales[1]))
-    grafo.agregar_arista(Arista(nodos_iniciales[1], nodos_iniciales[2]))
-    grafo.agregar_arista(Arista(nodos_iniciales[0], nodos_iniciales[2]))
+    grafo.agregar_arista(Arista(nodos_iniciales[0], nodos_iniciales[1], random.uniform(1,10)))
+    grafo.agregar_arista(Arista(nodos_iniciales[1], nodos_iniciales[2], random.uniform(1,10)))
+    grafo.agregar_arista(Arista(nodos_iniciales[0], nodos_iniciales[2], random.uniform(1,10)))
 
     # Agregar nodos adicionales conectados a una arista existente
     for i in range(3, n):
@@ -286,8 +344,8 @@ def grafoDorogovtsevMendes(n, dirigido=False):
         
         # Selección de una arista aleatoria para conectar el nuevo nodo
         arista_random = random.choice(list(grafo.aristas))
-        grafo.agregar_arista(Arista(nuevo_nodo, arista_random.n1))
-        grafo.agregar_arista(Arista(nuevo_nodo, arista_random.n2))
+        grafo.agregar_arista(Arista(nuevo_nodo, arista_random.n1, random.uniform(1,10)))
+        grafo.agregar_arista(Arista(nuevo_nodo, arista_random.n2, random.uniform(1,10)))
 
     return grafo
 
