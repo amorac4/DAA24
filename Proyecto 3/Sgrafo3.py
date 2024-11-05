@@ -59,7 +59,7 @@ class Grafo:
                 else:
                     f.write(f'    "{arista.n1.id}" -- "{arista.n2.id}"[label="{distancia_redondeada}", len="{distancia_redondeada}"];\n')
             f.write("}\n")
-            
+
     def guardar_graphviz_con_distancias(self, filename, distancias):
         with open(filename, 'w') as f:
             f.write("digraph G {\n" if self.dirigido else "graph G {\n")
@@ -157,22 +157,26 @@ class Grafo:
      return float('inf')
 
     def dijkstra(self, nodo_inicio):
-        # Inicializar distancias con infinito para todos excepto el nodo inicio
+        # Inicializar distancias con infinito para todos excepto el nodo de inicio
         distancias = {nodo: float('inf') for nodo in self.nodos}
         distancias[nodo_inicio] = 0
 
-        # Cola de prioridad para nodos a explorar
+        # Cola de prioridad para nodos a explorar, basada en la distancia
         cola_prioridad = [(0, nodo_inicio)]
         heapq.heapify(cola_prioridad)
 
         while cola_prioridad:
             distancia_actual, nodo_actual = heapq.heappop(cola_prioridad)
 
+            # Si la distancia actual es mayor que la registrada, ignorar
             if distancia_actual > distancias[nodo_actual]:
                 continue
 
+            # Explorar vecinos del nodo actual
             for vecino, peso in self.vecinos_con_peso(nodo_actual):
                 nueva_distancia = distancia_actual + peso
+
+                # Si encontramos un camino más corto hacia el vecino, lo actualizamos
                 if nueva_distancia < distancias[vecino]:
                     distancias[vecino] = nueva_distancia
                     heapq.heappush(cola_prioridad, (nueva_distancia, vecino))
@@ -180,6 +184,7 @@ class Grafo:
         return distancias
 
     def vecinos_con_peso(self, nodo):
+        # Devuelve una lista de tuplas (vecino, peso) para cada arista que conecta con el nodo
         vecinos = []
         for arista in self.aristas:
             if arista.n1 == nodo:
