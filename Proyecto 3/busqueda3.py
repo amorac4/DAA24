@@ -1,10 +1,10 @@
 
 import os
 import random
-from bfs import BFS
-from dfs_r import DFS_Recursivo
-from dfs_i import DFS_ITERATIVO
-from Sgrafo import Grafo, cargarG
+from bfs3 import BFS
+from dfs_r3 import DFS_Recursivo
+from dfs_i3 import DFS_ITERATIVO
+from Sgrafo3 import Grafo, cargarG
 
 # Ruta a la carpeta con los archivos .gv
 CARPETA_GRAFOS = "/home/verzzul/Escritorio/DAA24/Proyecto 2/ejemplos_grafos_buscados/"

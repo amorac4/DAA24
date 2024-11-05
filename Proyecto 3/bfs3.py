@@ -1,7 +1,7 @@
 # bfs.py
 from collections import deque
-from Sarista import Arista
-from Sgrafo import Grafo
+from Sarista3 import Arista
+from Sgrafo3 import Grafo
 
 class BFS:
     def __init__(self, graph):

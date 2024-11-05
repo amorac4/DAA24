@@ -1,8 +1,8 @@
 import random
 import math
 import heapq
-from Snodo import Nodo
-from Sarista import Arista
+from Snodo3 import Nodo
+from Sarista3 import Arista
 
 # Clase Grafo para representar un grafo con nodos y aristas.
 class Grafo:
@@ -59,6 +59,24 @@ class Grafo:
                 else:
                     f.write(f'    "{arista.n1.id}" -- "{arista.n2.id}"[label="{distancia_redondeada}", len="{distancia_redondeada}"];\n')
             f.write("}\n")
+            
+    def guardar_graphviz_con_distancias(self, filename, distancias):
+        with open(filename, 'w') as f:
+            f.write("digraph G {\n" if self.dirigido else "graph G {\n")
+
+            # Escribir nodos con las distancias desde el nodo de origen
+            for nodo in self.nodos:
+                distancia = distancias.get(nodo, float('inf'))
+                f.write(f'"{nodo.id} ({distancia:.2f})";\n')
+
+            # Escribir aristas con pesos
+            for arista in self.aristas:
+                if self.dirigido:
+                    f.write(f'"{arista.n1.id} ({distancias[arista.n1]:.2f})" -> "{arista.n2.id} ({distancias[arista.n2]:.2f})" [label="{arista.peso}"];\n')
+                else:
+                    f.write(f'"{arista.n1.id} ({distancias[arista.n1]:.2f})" -- "{arista.n2.id} ({distancias[arista.n2]:.2f})" [label="{arista.peso}"];\n')
+
+            f.write("}\n")
 
     def mostrar_grafo(self):
         #imprime la estructuta del grafo, indicando si es dirigido o no, y el numero de nodos y aristas
@@ -68,15 +86,16 @@ class Grafo:
         if nodo in self.nodos:
             return len(nodo.aristas)
         return 0
-def cargarG(archivo):
-    grafo = Grafo()
-    nodos = {}
+    
+    def cargarG(archivo):
+     grafo = Grafo()
+     nodos = {}
 
-    with open(archivo, 'r') as f:
+     with open(archivo, 'r') as f:
         lineas = f.readlines()
 
-    # Procesar los nodos
-    for linea in lineas:
+      # Procesar los nodos
+     for linea in lineas:
         linea = linea.strip()
         if linea.startswith('"') and linea.endswith(';') and not ('--' in linea or '->' in linea):
             nodo_id = linea.replace('"', '').replace(';', '').strip()
@@ -84,8 +103,8 @@ def cargarG(archivo):
             grafo.agregar_nodo(nodo)
             nodos[nodo_id] = nodo
 
-    # Procesar las aristas
-    for linea in lineas:
+     # Procesar las aristas
+     for linea in lineas:
         linea = linea.strip()
         if '--' in linea or '->' in linea:
             # Extraer los IDs de los nodos y el peso, ignorando "len"
@@ -111,12 +130,12 @@ def cargarG(archivo):
             else:
                 print(f"No se encontraron nodos para la arista {n1_id} <-> {n2_id}")
 
-    print(f"Aristas en el grafo: {[(arista.n1.id, arista.n2.id, arista.peso) for arista in grafo.aristas]}")
-    return grafo
+     print(f"Aristas en el grafo: {[(arista.n1.id, arista.n2.id, arista.peso) for arista in grafo.aristas]}")
+     return grafo
 
 
-def guardarArbol (grafo, nombre):
-    with open(nombre, 'w') as archivo:
+    def guardarArbol (grafo, nombre):
+     with open(nombre, 'w') as archivo:
         archivo.write("graph G {\n")
 
         for nodo in grafo.nodos.values():
@@ -125,44 +144,49 @@ def guardarArbol (grafo, nombre):
                     archivo.write(f'"{nodo.id}" -- "{vecino.id}";\n')
         archivo.write("}\n")
 
-def generar_nodos(n, nombre_prefix="n"):
+    def generar_nodos(n, nombre_prefix="n"):
     #Genera n nodos con un prefijo de nombre.
     #Retorna una lista de objetos Nodo con identificadores unicos.
-    return [Nodo(f"{nombre_prefix}{i}") for i in range(n)]
+     return [Nodo(f"{nombre_prefix}{i}") for i in range(n)]
 
-def peso_arista(self, nodo1, nodo2):
+    def peso_arista(self, nodo1, nodo2):
 
-    for arista in self.aristas:
+     for arista in self.aristas:
         if(arista.n1 == nodo1 and arista.n2 == nodo2) or (arista.n1 == nodo2 and arista.n2 == nodo1):
             return arista.peso
-    return float('inf')
+     return float('inf')
 
-def dijkstra (self, nodo_inicio):
-    distancia = {nodo: float('inf') for nodo in self.nodos}
-    distancia[nodo_inicio] = 0
+    def dijkstra(self, nodo_inicio):
+        # Inicializar distancias con infinito para todos excepto el nodo inicio
+        distancias = {nodo: float('inf') for nodo in self.nodos}
+        distancias[nodo_inicio] = 0
 
-    cola_prioridad = [(0, nodo_inicio)]
-    heapq.heapify(cola_prioridad)
-     
-    while cola_prioridad:
-      distancia_actual, nodo_actual = heapq.heappop(cola_prioridad)
+        # Cola de prioridad para nodos a explorar
+        cola_prioridad = [(0, nodo_inicio)]
+        heapq.heapify(cola_prioridad)
 
-      if distancia_actual > distancia [nodo_actual]:
-          continue
-      for vecino in self.vecinos(nodo_actual):
-          peso = self.peso_arista(nodo_actual, vecino)
-          nueva_distancia = distancia_actual+ peso
+        while cola_prioridad:
+            distancia_actual, nodo_actual = heapq.heappop(cola_prioridad)
 
-          if nueva_distancia < distancia[vecino]:
-           distancia[vecino] = nueva_distancia
-           heapq. heappush(cola_prioridad,(nueva_distancia, vecino))
+            if distancia_actual > distancias[nodo_actual]:
+                continue
 
-    return distancia
+            for vecino, peso in self.vecinos_con_peso(nodo_actual):
+                nueva_distancia = distancia_actual + peso
+                if nueva_distancia < distancias[vecino]:
+                    distancias[vecino] = nueva_distancia
+                    heapq.heappush(cola_prioridad, (nueva_distancia, vecino))
 
+        return distancias
 
-
-    
-
+    def vecinos_con_peso(self, nodo):
+        vecinos = []
+        for arista in self.aristas:
+            if arista.n1 == nodo:
+                vecinos.append((arista.n2, arista.peso))
+            elif arista.n2 == nodo:
+                vecinos.append((arista.n1, arista.peso))
+        return vecinos
 
 
 # Genera un grafo de malla de tamaño m x n.

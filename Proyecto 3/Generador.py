@@ -1,5 +1,5 @@
 #se importan las funciones del modulo Sgrafo
-from Sgrafo import grafoMalla, grafoErdosRenyi, grafoGilbert, grafoGeografico, grafoBarabasiAlbert, grafoDorogovtsevMendes
+from Sgrafo3 import grafoMalla, grafoErdosRenyi, grafoGilbert, grafoGeografico, grafoBarabasiAlbert, grafoDorogovtsevMendes
 
 # Clase GenGrafo para manejar la generacion y visualizacion de ls grafos.
 class GenGrafo:
@@ -29,10 +29,10 @@ class GenGrafo:
 #Funcion principal para ejecutar la generacion de los ejemplos
 def ejecutar_ejemplos():
     # lista de tamaños de nodod para los ejemplos
-    nodos_list = [ 30, 100, 500]
+    nodos_list = [ 30, 500]
     
     # Crear grafos de malla
-    for filas, columnas in [(5, 6), (20, 5), (25, 20)]:
+    for filas, columnas in [(5, 6), (25, 20)]:
         grafo_malla = grafoMalla(filas, columnas)
         print(f"Grafo de Malla ({filas * columnas} nodos):")
         grafo_malla.mostrar_grafo()

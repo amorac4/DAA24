@@ -1,6 +1,6 @@
 # dfs_r.py
-from Sarista import Arista
-from Sgrafo import Grafo
+from Sarista3 import Arista
+from Sgrafo3 import Grafo
 
 class DFS_Recursivo:
     def __init__(self, graph):
