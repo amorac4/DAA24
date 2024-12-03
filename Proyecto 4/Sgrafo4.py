@@ -33,6 +33,9 @@ class Grafo:
             return True
         return False
 
+    def aristas_ordenadas (self):
+       return sorted(self.aristas)
+
     def vecinos(self, nodo):
         # Este método debe devolver una lista de nodos vecinos
         vecinos = []
@@ -192,7 +195,19 @@ class Grafo:
             elif arista.n2 == nodo:
                 vecinos.append((arista.n1, arista.peso))
         return vecinos
-
+    
+    def conjunto_disjunto(self):
+        familia = {nodo.id: nodo.id for nodo in self.nodos}
+        rankeo = {nodo.id: 0 for nodo in self.nodos}
+        return familia, rankeo
+    
+    def find (self, familia, x):
+        if familia[x] !=x:
+            familia[x] = self.find(familia, familia[x])
+            return familia[x]
+    def union(self , familia, rankeo, x, y):
+        raiz_x = self.find(familia, x)
+        raiz_y = self.find(familia, y)
 
 # Genera un grafo de malla de tamaño m x n.
 # Conecta cada nodo con sus vecinos inmediatos en una estructura rectangular.

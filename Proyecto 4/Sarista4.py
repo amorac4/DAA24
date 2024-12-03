@@ -16,4 +16,5 @@ class Arista:
         # Devuelve un hash basado en los IDs de los nodos
         return hash((min(self.n1.id, self.n2.id), max(self.n1.id, self.n2.id)))
     
-
+    def __lt__(self, other):
+       return self.peso < other.peso 
