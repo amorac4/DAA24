@@ -10,6 +10,8 @@ class Grafo:
         self.nodos = [] #lista  nodos en el grafo
         self.aristas = set()#Conjunto de aristas en el grafo
         self.dirigido = dirigido # Indiga si el grafo es dirigido o no
+        self.familia= {}
+        self.rankeo= {}
 
     def agregar_nodo(self, nodo):
         # Agrega un nodo al grafo
@@ -22,8 +24,6 @@ class Grafo:
         else:
             return arista in self.aristas or Arista(arista.n2, arista.n1, arista.peso) in self.aristas
     
-
-
     def agregar_arista(self, arista):
         #Agrega una arista si no existe ya en el grafo
         if not self.existe_arista(arista):
@@ -63,23 +63,27 @@ class Grafo:
                     f.write(f'    "{arista.n1.id}" -- "{arista.n2.id}"[label="{distancia_redondeada}", len="{distancia_redondeada}"];\n')
             f.write("}\n")
 
-    def guardar_graphviz_con_distancias(self, filename, distancias):
-        with open(filename, 'w') as f:
-            f.write("digraph G {\n" if self.dirigido else "graph G {\n")
+    def guardar_graphviz(self, filename):
+      with open(filename, 'w') as f:
+        # Escribe el encabezado dependiendo de si el grafo es dirigido
+        f.write("digraph G {\n" if self.dirigido else "graph G {\n")
+        
+        # Escribir todos los nodos
+        for nodo in self.nodos:
+            f.write(f'"{nodo.id}";\n')
 
-            # Escribir nodos con las distancias desde el nodo de origen
-            for nodo in self.nodos:
-                distancia = distancias.get(nodo, float('inf'))
-                f.write(f'"{nodo.id} ({distancia:.2f})";\n')
+        # Escribir todas las aristas
+        for arista in self.aristas:
+            peso = arista.peso  # Obtener el peso de la arista
+            distancia_redondeada = round(peso, 2)  # Redondear el peso a 2 decimales
+            if self.dirigido:
+                f.write(f'"{arista.n1.id}" -> "{arista.n2.id}" [label="{distancia_redondeada}"];\n')
+            else:
+                f.write(f'"{arista.n1.id}" -- "{arista.n2.id}" [label="{distancia_redondeada}"];\n')
 
-            # Escribir aristas con pesos
-            for arista in self.aristas:
-                if self.dirigido:
-                    f.write(f'"{arista.n1.id} ({distancias[arista.n1]:.2f})" -> "{arista.n2.id} ({distancias[arista.n2]:.2f})" [label="{arista.peso}"];\n')
-                else:
-                    f.write(f'"{arista.n1.id} ({distancias[arista.n1]:.2f})" -- "{arista.n2.id} ({distancias[arista.n2]:.2f})" [label="{arista.peso}"];\n')
-
-            f.write("}\n")
+        # Escribir el cierre del archivo
+        f.write("}\n")
+      print(f"Grafo guardado correctamente en {filename}.")
 
     def mostrar_grafo(self):
         #imprime la estructuta del grafo, indicando si es dirigido o no, y el numero de nodos y aristas
@@ -91,52 +95,62 @@ class Grafo:
         return 0
     
     def cargarG(archivo):
-     grafo = Grafo()
-     nodos = {}
+            grafo = Grafo()
+            nodos = {}
 
-     with open(archivo, 'r') as f:
-        lineas = f.readlines()
+            with open(archivo, 'r') as f:
+                lineas = f.readlines()
 
-      # Procesar los nodos
-     for linea in lineas:
-        linea = linea.strip()
-        if linea.startswith('"') and linea.endswith(';') and not ('--' in linea or '->' in linea):
-            nodo_id = linea.replace('"', '').replace(';', '').strip()
-            nodo = Nodo(nodo_id)
-            grafo.agregar_nodo(nodo)
-            nodos[nodo_id] = nodo
+            # Procesar los nodos
+            for linea in lineas:
+                linea = linea.strip()
+                if linea.startswith('"') and linea.endswith(';') and not ('--' in linea or '->' in linea):
+                    nodo_id = linea.replace('"', '').replace(';', '').strip()
+                    nodo = Nodo(nodo_id)
+                    grafo.agregar_nodo(nodo)
+                    nodos[nodo_id] = nodo
 
-     # Procesar las aristas
-     for linea in lineas:
-        linea = linea.strip()
-        if '--' in linea or '->' in linea:
-            # Extraer los IDs de los nodos y el peso, ignorando "len"
-            aux = linea.replace(';', '').split('[')
-            nodos_partes = aux[0].strip().split()
-            n1_id = nodos_partes[0].strip().replace('"', '')
-            n2_id = nodos_partes[-1].strip().replace('"', '')
+            # Procesar las aristas
+            for linea in lineas:
+                linea = linea.strip()
+                if '--' in linea or '->' in linea:
+                    partes = linea.replace(';', '').split('[')
+                    if len(partes) < 1:  # Validación básica
+                        print(f"Advertencia: Línea inválida encontrada: {linea}")
+                        continue
 
-            # Extraer el peso
-            peso = 1  # Valor por defecto
-            if len(aux) > 1:
-                atributos = aux[1].replace(']', '').split(',')
-                for atributo in atributos:
-                    if 'label' in atributo:
-                        peso = float(atributo.split('=')[1].replace('"', '').strip())
+                    nodos_partes = partes[0].strip().split()
+                    if len(nodos_partes) < 2:  # Verifica que hay al menos dos nodos
+                        print(f"Advertencia: Nodo o arista mal formateados en línea: {linea}")
+                        continue
 
-            if n1_id in nodos and n2_id in nodos:
-                arista = Arista(nodos[n1_id], nodos[n2_id], peso)
-                if grafo.agregar_arista(arista):
-                    print(f"Arista agregada: {n1_id} -- {n2_id} con peso {peso}")
-                else:
-                    print(f"La arista entre {n1_id} y {n2_id} ya existe.")
-            else:
-                print(f"No se encontraron nodos para la arista {n1_id} <-> {n2_id}")
+                    n1_id = nodos_partes[0].strip().replace('"', '')
+                    n2_id = nodos_partes[-1].strip().replace('"', '')
 
-     print(f"Aristas en el grafo: {[(arista.n1.id, arista.n2.id, arista.peso) for arista in grafo.aristas]}")
-     return grafo
+                    # Extraer el peso de la arista
+                    peso = 1.0  # Valor por defecto si no se encuentra el atributo 'label'
+                    if len(partes) > 1:
+                        atributos = partes[1].replace(']', '').split(',')
+                        for atributo in atributos:
+                            if 'label' in atributo:
+                                try:
+                                    peso = float(atributo.split('=')[1].replace('"', '').strip())
+                                except ValueError:
+                                    print(f"Advertencia: Peso no válido en línea: {linea}")
 
+                    # Verificar y agregar la arista si los nodos existen
+                    if n1_id in nodos and n2_id in nodos:
+                        arista = Arista(nodos[n1_id], nodos[n2_id], peso)
+                        if grafo.agregar_arista(arista):
+                            print(f"Arista agregada: {n1_id} -- {n2_id} con peso {peso}")
+                        else:
+                            print(f"La arista {n1_id} -- {n2_id} ya existe.")
+                    else:
+                        print(f"Advertencia: Nodos no encontrados para la arista {n1_id} -- {n2_id} en línea: {linea}")
 
+            print(f"Resumen del grafo cargado: {len(grafo.nodos)} nodos, {len(grafo.aristas)} aristas.")
+            return grafo
+   
     def guardarArbol (grafo, nombre):
      with open(nombre, 'w') as archivo:
         archivo.write("graph G {\n")
@@ -196,18 +210,29 @@ class Grafo:
                 vecinos.append((arista.n1, arista.peso))
         return vecinos
     
-    def conjunto_disjunto(self):
-        familia = {nodo.id: nodo.id for nodo in self.nodos}
-        rankeo = {nodo.id: 0 for nodo in self.nodos}
-        return familia, rankeo
+
     
-    def find (self, familia, x):
-        if familia[x] !=x:
-            familia[x] = self.find(familia, familia[x])
-            return familia[x]
-    def union(self , familia, rankeo, x, y):
-        raiz_x = self.find(familia, x)
-        raiz_y = self.find(familia, y)
+    def conjunto_disjunto(self, nodo):
+        self.familia[nodo]= nodo
+        self.rankeo[nodo] = 0
+    
+    def find (self, nodo):
+        if self.familia[nodo] !=nodo:
+            self.familia[nodo] = self.find(self.familia[nodo])
+            return self.familia[nodo]
+        
+    def union(self , familia, n1, n2):
+        raiz_n1 = self.find(familia, n1)
+        raiz_n2 = self.find(familia, n2)
+
+        if raiz_n1 != raiz_n2:
+            if self.rankeo[raiz_n1] > self.rankeo[raiz_n2]:
+                self.familia[raiz_n2] = raiz_n1
+            elif self.rankeo[raiz_n1] < self.rankeo[raiz_n2]:
+                self.familia[raiz_n1] = raiz_n2
+            else:
+                self.familia[raiz_n2] = raiz_n1
+                self.rankeo[raiz_n1] += 1
 
 # Genera un grafo de malla de tamaño m x n.
 # Conecta cada nodo con sus vecinos inmediatos en una estructura rectangular.
