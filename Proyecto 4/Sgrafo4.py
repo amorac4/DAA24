@@ -209,9 +209,7 @@ class Grafo:
             elif arista.n2 == nodo:
                 vecinos.append((arista.n1, arista.peso))
         return vecinos
-    
 
-    
     def conjunto_disjunto(self, nodo):
         self.familia[nodo]= nodo
         self.rankeo[nodo] = 0
