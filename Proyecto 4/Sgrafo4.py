@@ -2,7 +2,9 @@ import random
 import math
 import heapq
 from Snodo4 import Nodo
+from collections import deque
 from Sarista4 import Arista
+
 
 # Clase Grafo para representar un grafo con nodos y aristas.
 class Grafo:
@@ -12,6 +14,7 @@ class Grafo:
         self.dirigido = dirigido # Indiga si el grafo es dirigido o no
         self.familia= {}
         self.rankeo= {}
+        
 
     def agregar_nodo(self, nodo):
         # Agrega un nodo al grafo
@@ -63,27 +66,23 @@ class Grafo:
                     f.write(f'    "{arista.n1.id}" -- "{arista.n2.id}"[label="{distancia_redondeada}", len="{distancia_redondeada}"];\n')
             f.write("}\n")
 
-    def guardar_graphviz(self, filename):
-      with open(filename, 'w') as f:
-        # Escribe el encabezado dependiendo de si el grafo es dirigido
-        f.write("digraph G {\n" if self.dirigido else "graph G {\n")
-        
-        # Escribir todos los nodos
-        for nodo in self.nodos:
-            f.write(f'"{nodo.id}";\n')
+    def guardar_graphviz_con_distancias(self, filename, distancias):
+        with open(filename, 'w') as f:
+            f.write("digraph G {\n" if self.dirigido else "graph G {\n")
 
-        # Escribir todas las aristas
-        for arista in self.aristas:
-            peso = arista.peso  # Obtener el peso de la arista
-            distancia_redondeada = round(peso, 2)  # Redondear el peso a 2 decimales
-            if self.dirigido:
-                f.write(f'"{arista.n1.id}" -> "{arista.n2.id}" [label="{distancia_redondeada}"];\n')
-            else:
-                f.write(f'"{arista.n1.id}" -- "{arista.n2.id}" [label="{distancia_redondeada}"];\n')
+            # Escribir nodos con las distancias desde el nodo de origen
+            for nodo in self.nodos:
+                distancia = distancias.get(nodo, float('inf'))
+                f.write(f'"{nodo.id} ({distancia:.2f})";\n')
 
-        # Escribir el cierre del archivo
-        f.write("}\n")
-      print(f"Grafo guardado correctamente en {filename}.")
+            # Escribir aristas con pesos
+            for arista in self.aristas:
+                if self.dirigido:
+                    f.write(f'"{arista.n1.id} ({distancias[arista.n1]:.2f})" -> "{arista.n2.id} ({distancias[arista.n2]:.2f})" [label="{arista.peso}"];\n')
+                else:
+                    f.write(f'"{arista.n1.id} ({distancias[arista.n1]:.2f})" -- "{arista.n2.id} ({distancias[arista.n2]:.2f})" [label="{arista.peso}"];\n')
+
+            f.write("}\n")
 
     def mostrar_grafo(self):
         #imprime la estructuta del grafo, indicando si es dirigido o no, y el numero de nodos y aristas
@@ -95,62 +94,61 @@ class Grafo:
         return 0
     
     def cargarG(archivo):
-            grafo = Grafo()
-            nodos = {}
+        grafo = Grafo()
+        nodos = {}
 
-            with open(archivo, 'r') as f:
-                lineas = f.readlines()
+        with open(archivo, 'r') as f:
+            lineas = f.readlines()
 
-            # Procesar los nodos
-            for linea in lineas:
-                linea = linea.strip()
-                if linea.startswith('"') and linea.endswith(';') and not ('--' in linea or '->' in linea):
-                    nodo_id = linea.replace('"', '').replace(';', '').strip()
-                    nodo = Nodo(nodo_id)
-                    grafo.agregar_nodo(nodo)
-                    nodos[nodo_id] = nodo
+        # Procesar los nodos
+        for linea in lineas:
+            linea = linea.strip()
+            if linea.startswith('"') and linea.endswith(';') and not ('--' in linea or '->' in linea):
+                nodo_id = linea.replace('"', '').replace(';', '').strip()
+                nodo = Nodo(nodo_id)
+                grafo.agregar_nodo(nodo)
+                nodos[nodo_id] = nodo
 
-            # Procesar las aristas
-            for linea in lineas:
-                linea = linea.strip()
-                if '--' in linea or '->' in linea:
-                    partes = linea.replace(';', '').split('[')
-                    if len(partes) < 1:  # Validación básica
-                        print(f"Advertencia: Línea inválida encontrada: {linea}")
-                        continue
+        # Procesar las aristas
+        for linea in lineas:
+            linea = linea.strip()
+            if '--' in linea or '->' in linea:
+                # Extraer los IDs de los nodos y el peso
+                aux = linea.replace(';', '').split('[')
+                nodos_partes = aux[0].strip().split()
+                n1_id = nodos_partes[0].strip().replace('"', '')
+                n2_id = nodos_partes[-1].strip().replace('"', '')
 
-                    nodos_partes = partes[0].strip().split()
-                    if len(nodos_partes) < 2:  # Verifica que hay al menos dos nodos
-                        print(f"Advertencia: Nodo o arista mal formateados en línea: {linea}")
-                        continue
+                # Extraer el peso
+                peso = 1  # Valor por defecto
+                if len(aux) > 1:
+                    atributos = aux[1].replace(']', '').split(',')
+                    for atributo in atributos:
+                        if 'label' in atributo:
+                            try:
+                                peso = float(atributo.split('=')[1].replace('"', '').strip())
+                            except ValueError:
+                                print(f"Advertencia: Peso malformado en {linea}, asignando peso por defecto de 1.")
+                                peso = 1
 
-                    n1_id = nodos_partes[0].strip().replace('"', '')
-                    n2_id = nodos_partes[-1].strip().replace('"', '')
-
-                    # Extraer el peso de la arista
-                    peso = 1.0  # Valor por defecto si no se encuentra el atributo 'label'
-                    if len(partes) > 1:
-                        atributos = partes[1].replace(']', '').split(',')
-                        for atributo in atributos:
-                            if 'label' in atributo:
-                                try:
-                                    peso = float(atributo.split('=')[1].replace('"', '').strip())
-                                except ValueError:
-                                    print(f"Advertencia: Peso no válido en línea: {linea}")
-
-                    # Verificar y agregar la arista si los nodos existen
-                    if n1_id in nodos and n2_id in nodos:
+                # Crear la arista con el peso adecuado
+                if n1_id in nodos and n2_id in nodos:
+                    try:
                         arista = Arista(nodos[n1_id], nodos[n2_id], peso)
                         if grafo.agregar_arista(arista):
                             print(f"Arista agregada: {n1_id} -- {n2_id} con peso {peso}")
                         else:
-                            print(f"La arista {n1_id} -- {n2_id} ya existe.")
-                    else:
-                        print(f"Advertencia: Nodos no encontrados para la arista {n1_id} -- {n2_id} en línea: {linea}")
+                            print(f"La arista entre {n1_id} y {n2_id} ya existe.")
+                    except TypeError as e:
+                        print(f"Error al crear la arista: {e}. Línea: {linea}")
+                else:
+                    print(f"No se encontraron nodos para la arista {n1_id} <-> {n2_id}")
 
-            print(f"Resumen del grafo cargado: {len(grafo.nodos)} nodos, {len(grafo.aristas)} aristas.")
-            return grafo
-   
+        print(f"Aristas en el grafo: {[(arista.n1.id, arista.n2.id, arista.peso) for arista in grafo.aristas]}")
+        return grafo
+
+
+
     def guardarArbol (grafo, nombre):
      with open(nombre, 'w') as archivo:
         archivo.write("graph G {\n")
@@ -214,14 +212,14 @@ class Grafo:
         self.familia[nodo]= nodo
         self.rankeo[nodo] = 0
     
-    def find (self, nodo):
-        if self.familia[nodo] !=nodo:
-            self.familia[nodo] = self.find(self.familia[nodo])
-            return self.familia[nodo]
+    def find(self, nodo):
+        if self.familia[nodo] != nodo:
+            self.familia[nodo] = self.find(self.familia[nodo])  # Compresión de camino
+        return self.familia[nodo]
         
-    def union(self , familia, n1, n2):
-        raiz_n1 = self.find(familia, n1)
-        raiz_n2 = self.find(familia, n2)
+    def union(self, n1, n2):
+        raiz_n1 = self.find(n1)
+        raiz_n2 = self.find(n2)
 
         if raiz_n1 != raiz_n2:
             if self.rankeo[raiz_n1] > self.rankeo[raiz_n2]:
@@ -231,6 +229,163 @@ class Grafo:
             else:
                 self.familia[raiz_n2] = raiz_n1
                 self.rankeo[raiz_n1] += 1
+
+    def prim(self):
+            """Genera el Árbol de Expansión Mínima utilizando el algoritmo de Prim."""
+            if not self.nodos:
+                raise ValueError("El grafo no tiene nodos.")
+            
+            nodo_inicio = random.choice(self.nodos)
+            visitados = set()
+            mst = []
+            cola_prioridad = []
+            peso_total = 0
+
+            for vecino, peso in self.vecinos_con_peso(nodo_inicio):
+                heapq.heappush(cola_prioridad, (peso, nodo_inicio, vecino))
+
+            visitados.add(nodo_inicio)
+
+            while cola_prioridad:
+                peso, origen, destino = heapq.heappop(cola_prioridad)
+
+                if destino in visitados:
+                    continue
+
+                mst.append((origen, destino, peso))
+                peso_total += peso
+                visitados.add(destino)
+
+                for vecino, peso in self.vecinos_con_peso(destino):
+                    if vecino not in visitados:
+                        heapq.heappush(cola_prioridad, (peso, destino, vecino))
+
+            print(f"Peso total del MST (Prim): {peso_total:.2f}")
+            
+            return mst
+
+    def kruskalD(self):
+        """Genera el MST utilizando el algoritmo de Kruskal Directo."""
+        # Inicializar los conjuntos disjuntos para cada nodo
+        for nodo in self.nodos:
+            self.conjunto_disjunto(nodo)
+
+        mst = []  # Lista para almacenar las aristas del MST
+        peso_total = 0  # Variable para acumular el peso total del MST
+
+        # Ordenar las aristas por peso ascendente
+        aristas_ordenadas = sorted(self.aristas, key=lambda a: a.peso)
+
+        for arista in aristas_ordenadas:
+            # Verificar si los nodos de la arista están en diferentes conjuntos
+            if self.find(arista.n1) != self.find(arista.n2):
+                mst.append(arista)  # Agregar la arista al MST
+                peso_total += arista.peso  # Sumar el peso de la arista
+                self.union(arista.n1, arista.n2)  # Unir los conjuntos
+
+        print(f"Peso total del MST (Kruskal Directo): {peso_total:.2f}")
+        return mst
+
+
+    def kruskalI(self):
+        """Genera el MST utilizando el algoritmo de Kruskal Inverso."""
+        mst = []  # Lista para almacenar las aristas del MST
+        grafo_copia = Grafo(dirigido=self.dirigido)  # Crear un grafo para simular las eliminaciones
+        grafo_copia.nodos = self.nodos.copy()
+        grafo_copia.aristas = self.aristas.copy()
+
+        # Ordenar las aristas por peso descendente
+        aristas_ordenadas = sorted(self.aristas, key=lambda a: a.peso, reverse=True)
+
+        for arista in aristas_ordenadas:
+            grafo_copia.aristas.remove(arista)  # Eliminar arista del grafo simulado
+
+            # Verificar conectividad mediante BFS
+            if len(grafo_copia.bfs(grafo_copia.nodos[0]).nodos) == len(self.nodos):
+                # Si sigue conectado, mantenemos la arista fuera del MST
+                continue
+            else:
+                # Si desconecta el grafo, restaurar la arista
+                grafo_copia.aristas.add(arista)
+                mst.append(arista)
+
+        # Calcular peso total del MST generado
+        peso_total = sum(arista.peso for arista in mst)
+        print(f"Peso total del MST (Kruskal Inverso): {peso_total:.2f}")
+        return mst
+
+    
+    def guardar_graphviz_algoritmo(self, archivo, mst, algoritmo):
+        """Guarda el árbol de expansión mínima (MST) generado por un algoritmo en formato Graphviz."""
+        if algoritmo == "prim":
+            with open(archivo, 'w') as f:
+                f.write("graph G {\n")  # Definir un grafo no dirigido
+
+                # Recopilar nodos únicos
+                nodos = set()
+                
+                for arista in mst:
+                        n1, n2, peso = arista  # Desempaquetar con nombres estándar
+                        nodos.add(n1)
+                        nodos.add(n2)
+
+                # Escribir los nodos en el archivo, ordenados por su ID
+                for nodo in sorted(nodos, key=lambda x: x.id):
+                    f.write(f'  "{nodo.id}";\n')
+
+                # Escribir las aristas con sus etiquetas y pesos
+                for arista in mst:
+                    n1, n2, peso = arista  # Desempaquetar con nombres estándar
+                    f.write(f'  "{n1.id}" -- "{n2.id}" [label="{round(peso, 2)}"];\n')
+
+                f.write("}\n")  # Cerrar la definición del grafo
+            print(f"Archivo Graphviz guardado: {archivo}")
+        else:
+            with open(archivo, 'w') as f:
+                f.write("graph G{\n")
+
+                nodos = set()
+                for arista in mst:
+                    nodos.add(arista.n1.id)
+                    nodos.add(arista.n2.id)
+
+                for nodo in nodos:
+                    f.write(f'"{nodo}";\n')
+
+                for arista in mst:
+                    n1= arista.n1.id
+                    n2= arista.n2.id
+                    peso = arista.peso  
+
+                   
+                    f.write(f'"{n1}"--"{n2}"[label="{round(peso, 2)}"];\n')     
+                f.write("}\n")
+            print(f"Archivo Graphviz guardado: {archivo}")
+
+    def bfs(self, nodo_inicio):
+        
+        arbol = Grafo(dirigido=self.dirigido)
+        visitados = set()
+        cola = deque([nodo_inicio])
+
+        arbol.agregar_nodo(nodo_inicio)
+        visitados.add(nodo_inicio.id)
+
+        while cola:
+            nodo_actual = cola.popleft()
+            for vecino in self.vecinos(nodo_actual):
+                if vecino.id not in visitados:
+                    visitados.add(vecino.id)
+                    arbol.agregar_nodo(vecino)
+                    # Ajustar para pasar un peso válido
+                    peso = self.peso_arista(nodo_actual, vecino)
+                    arbol.agregar_arista(Arista(nodo_actual, vecino, peso))
+                    cola.append(vecino)
+
+        return arbol
+
+
+
 
 # Genera un grafo de malla de tamaño m x n.
 # Conecta cada nodo con sus vecinos inmediatos en una estructura rectangular.
@@ -260,7 +415,6 @@ def grafoMalla(m, n, dirigido=False):
                 grafo.agregar_arista(Arista(nodos[i][j], nodos[i][j + 1], peso))
     
     return grafo
-
 # Genera un grafo aleatorio según el modelo Erdös-Rényi.
 # Crea n nodos y m aristas aleatorias.
 def grafoErdosRenyi(n, m, dirigido=False):
@@ -289,8 +443,6 @@ def grafoErdosRenyi(n, m, dirigido=False):
         grafo.agregar_arista(Arista(nodos[n1], nodos[n2], peso))
 
     return grafo
-
-
 # Genera un grafo aleatorio según el modelo Gilbert.
 # Crea un grafo donde cada par de nodos está conectado con una probabilidad p.
 def grafoGilbert(n, p, dirigido=False):
@@ -313,8 +465,6 @@ def grafoGilbert(n, p, dirigido=False):
                 grafo.agregar_arista(Arista(nodos[i], nodos[j], peso))
 
     return grafo
-
-
 # Genera un grafo aleatorio según el modelo geográfico.
 # Conecta nodos que se encuentran dentro de una distancia r en un plano unitario.
 def grafoGeografico(n, r, dirigido=False):
@@ -343,8 +493,6 @@ def grafoGeografico(n, r, dirigido=False):
                     grafo.agregar_arista(Arista(nodos[j], nodos[i], peso))  # Agregar solo si el grafo es dirigido
 
     return grafo
-
-
 # Genera un grafo aleatorio con el modelo Barabási-Albert.
 # Cada nuevo nodo se conecta a d nodos ya existentes con una probabilidad proporcional al grado de los nodos existentes.
 def grafoBarabasiAlbert(n, d, dirigido=False, auto=False):
@@ -382,9 +530,6 @@ def grafoBarabasiAlbert(n, d, dirigido=False, auto=False):
                         nodos_deg[v.id] += 1
 
     return grafo
-
-
-
 # Genera un grafo según el modelo Dorogovtsev-Mendes.
 # Inicia con un triángulo y agrega nodos que se conectan a una arista existente.
 def grafoDorogovtsevMendes(n, dirigido=False):

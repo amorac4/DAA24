@@ -6,7 +6,7 @@ class Kruskal_D:
     def __init__(self, grafo):
         self.grafo = grafo
 
-    def gen_mst(self):
+    def generar_mst(self):
         # Inicializar conjuntos disjuntos para todos los nodos
         for nodo in self.grafo.nodos:
             self.grafo.conjunto_disjunto(nodo)
