@@ -230,6 +230,7 @@ class Grafo:
                 self.familia[raiz_n2] = raiz_n1
                 self.rankeo[raiz_n1] += 1
 
+   
     def prim(self):
             """Genera el Árbol de Expansión Mínima utilizando el algoritmo de Prim."""
             if not self.nodos:
@@ -363,6 +364,26 @@ class Grafo:
             print(f"Archivo Graphviz guardado: {archivo}")
 
     def bfs(self, nodo_inicio):
+        
+        arbol = Grafo(dirigido=self.dirigido)
+        visitados = set()
+        cola = deque([nodo_inicio])
+
+        arbol.agregar_nodo(nodo_inicio)
+        visitados.add(nodo_inicio.id)
+
+        while cola:
+            nodo_actual = cola.popleft()
+            for vecino in self.vecinos(nodo_actual):
+                if vecino.id not in visitados:
+                    visitados.add(vecino.id)
+                    arbol.agregar_nodo(vecino)
+                    # Ajustar para pasar un peso válido
+                    peso = self.peso_arista(nodo_actual, vecino)
+                    arbol.agregar_arista(Arista(nodo_actual, vecino, peso))
+                    cola.append(vecino)
+
+        return arbol
         
         arbol = Grafo(dirigido=self.dirigido)
         visitados = set()
