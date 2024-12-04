@@ -1,78 +1,71 @@
-import sys
-sys.path.append("/home/verzzul/Escritorio/DAA24/Proyecto 1")
-sys.path.append("E:\Maestria CIC\Cursos\Diseño y Analisis de Algoritmos\DAA24\Proyecto 1")
 
+import os
+import random
 from bfs import BFS
 from dfs_r import DFS_Recursivo
 from dfs_i import DFS_ITERATIVO
-from Sgrafo import  grafoBarabasiAlbert, grafoDorogovtsevMendes, grafoErdosRenyi, grafoGeografico, grafoGilbert, grafoMalla
+from Sgrafo import Grafo, cargarG
 
-def resultados_busqueda(nombre, tipo_busqueda, nodos_visitados):
-    filename = f"Resultado de {tipo_busqueda}en el grafo: {nombre}.txt"
-    with open(filename, 'w') as f:
-        f.write(f"Resultado de {tipo_busqueda} en el grafo: {nombre}\n")
-        f.write("Nodos visitados en orden:\n")
-        for nodo in nodos_visitados:
-            f.write(f" {nodo.id}\n")
+# Ruta a la carpeta con los archivos .gv
+CARPETA_GRAFOS = "/home/verzzul/Escritorio/DAA24/Proyecto 2/ejemplos_grafos_buscados/"
 
-def generar_grafos():
+def procesar_grafo(archivo):
+    try:
+        # Cargar el grafo desde el archivo
+        grafo = cargarG(archivo)
+        print(f"Grafo cargado desde: {archivo}")
 
-    nodo_list =[30, 100, 500]
-    grafos =[]
+        # Elegir un nodo inicial aleatorio
+        nodo_inicial = random.choice(grafo.nodos)
+        print("Nodo inicial:", nodo_inicial.id)
 
+        # BFS
+        try:
+            print("\nEjecutando BFS...")
+            bfs = BFS(grafo)
+            arbol_bfs = bfs.buscar(nodo_inicial)
+            arbol_bfs.guardar_graphviz(f"{archivo[:-3]}_bfs.gv")
+            print(f"BFS completado. Nodos visitados: {len(arbol_bfs.nodos)}")
+        except Exception as e:
+            print(f"Error en BFS: {e}")
 
-    for nodos in nodo_list:
+        # DFS Recursivo
+        try:
+            print("\nEjecutando DFS Recursivo...")
+            dfs_r = DFS_Recursivo(grafo)
+            arbol_dfsr = dfs_r.buscar(nodo_inicial)
+            arbol_dfsr.guardar_graphviz(f"{archivo[:-3]}_dfs_r.gv")
+            print(f"DFS Recursivo completado. Nodos visitados: {len(arbol_dfsr.nodos)}")
+        except Exception as e:
+            print(f"Error en DFS Recursivo: {e}")
 
-        grafos.append(("Erdös-Rényi",grafoErdosRenyi(nodos, int(nodos*1.5))))
-        grafos.append(("Gilbert", grafoGilbert(nodos, 0.1)))
-        grafos.append(("Geografico", grafoGeografico(nodos, 0.2)))
-        grafos.append(("Barabási-Albert",grafoBarabasiAlbert(nodos, 4)))
-        grafos.append(("Dorogovtsev-Mendes", grafoDorogovtsevMendes(nodos)))
+        # DFS Iterativo
+        try:
+            print("\nEjecutando DFS Iterativo...")
+            dfs_i = DFS_ITERATIVO(grafo)
+            arbol_dfsi = dfs_i.buscar(nodo_inicial)
+            arbol_dfsi.guardar_graphviz(f"{archivo[:-3]}_dfs_i.gv")
+            print(f"DFS Iterativo completado. Nodos visitados: {len(arbol_dfsi.nodos)}")
+        except Exception as e:
+            print(f"Error en DFS Iterativo: {e}")
 
-    return grafos
-
+    except Exception as e:
+        print(f"Error procesando el archivo {archivo}: {e}")
 
 def iniciar_busqueda():
+    # Cargar todos los archivos .gv desde la carpeta especificada
+    if not os.path.exists(CARPETA_GRAFOS):
+        print(f"La carpeta {CARPETA_GRAFOS} no existe.")
+        return
 
-    grafos = generar_grafos()
+    archivos_gv = [os.path.join(CARPETA_GRAFOS, f) for f in os.listdir(CARPETA_GRAFOS) if f.endswith('.gv')]
 
+    if not archivos_gv:
+        print(f"No se encontraron archivos .gv en la carpeta {CARPETA_GRAFOS}.")
+        return
 
-    malla =[
-
-        ("Malla", grafoMalla(5,6)),
-        ("Malla", grafoMalla(10,10)),
-        ("Malla", grafoMalla(25,20)),
-    ]
-
-    grafos.extend(malla)
-
-
-    for nombre, grafo in grafos:
-        print(f"\nGrafo generado: {nombre} con {len(grafo.nodos)} nodos")
-        
-        grafo.mostrar_grafo()
-
-        grafo.guardar_graphviz(f"{nombre}_generado.gv")
-
-        nodo_inicio = grafo.nodos[0] if grafo.nodos else None
-        if not nodo_inicio:
-            print(f"No hay nodos en el grafo {nombre}.")
-            continue
-
-        print("\nBusqueda en amplitud(BFS):")
-        bfs = BFS(grafo)
-        bfs.buscar(nodo_inicio)
-        resultados_busqueda(nombre, "BFS", nodos_visitados)
-
-        print("\nBusqueda en profundidad Recursiva (DFS RECURSIVO):")
-        dfsR = DFS_Recursivo(grafo)
-        dfsR.buscar(nodo_inicio)
-        resultados_busqueda(nombre, "DFS_R", nodos_visitados)
-
-        print("\nBusqueda en profundidad iterativa(DFS ITERATIVO):")
-        dfsI = DFS_ITERATIVO(grafo)
-        dfsI.buscar(nodo_inicio)
-        resultados_busqueda(nombre, "DFS_I", nodos_visitados)
+    for archivo in archivos_gv:
+        procesar_grafo(archivo)
 
 if __name__ == "__main__":
-            iniciar_busqueda()
+    iniciar_busqueda()

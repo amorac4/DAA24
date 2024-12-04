@@ -1,23 +1,23 @@
-
+# dfs_r.py
+from Sarista import Arista
+from Sgrafo import Grafo
 
 class DFS_Recursivo:
-
-    def __init__ (self, graph):
+    def __init__(self, graph):
         self.graph = graph
+        self.dirigido = graph.dirigido
 
-    def DFS_R_Auxiliar (self, node, visitados, orden):
-        
-        visitados.add(node)
-        orden.append(node)
-        print (f"Visitado: {node.id}")
-
-        for arista in node.aristas:
-            vecino = arista.n2 if arista.n1 == node else arista.n1
-            if vecino not in visitados:
-                self.DFS_R_Auxiliar(vecino, visitados, orden)
-    def buscar (self, nodo_inicio):
-
+    def buscar(self, nodo_inicio):
+        arbol = Grafo(dirigido=self.dirigido)
         visitados = set()
-        orden = []
-        self.DFS_R_Auxiliar(nodo_inicio, visitados, orden)
-        return orden
+
+        def DFS_R_Auxiliar(nodo):
+            visitados.add(nodo.id)
+            arbol.agregar_nodo(nodo)
+            for vecino in self.graph.vecinos(nodo):
+                if vecino.id not in visitados:
+                    arbol.agregar_arista(Arista(nodo, vecino))
+                    DFS_R_Auxiliar(vecino)
+
+        DFS_R_Auxiliar(nodo_inicio)
+        return arbol

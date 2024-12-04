@@ -1,30 +1,28 @@
+# bfs.py
 from collections import deque
-
-
+from Sarista import Arista
+from Sgrafo import Grafo
 
 class BFS:
-
-    def __init__ (self, graph):
+    def __init__(self, graph):
         self.graph = graph
+        self.dirigido = graph.dirigido
 
     def buscar(self, nodo_inicio):
-        #iniciar una cola para BFS
+        arbol = Grafo(dirigido=self.dirigido)
+        visitados = set()
         cola = deque([nodo_inicio])
-        #iniciar un conjunto para almacenar los nosos visitados
-        visitados = set([nodo_inicio])
-        orden = [nodo_inicio]
 
+        arbol.agregar_nodo(nodo_inicio)
+        visitados.add(nodo_inicio.id)
 
         while cola:
             nodo_actual = cola.popleft()
-            print(f"Visitado: {nodo_actual.id}")
-
-            for arista in nodo_actual.aristas:
-                vecino = arista.n2 if arista.n2 == nodo_actual else arista.n1
-                if vecino not in visitados:
-                    visitados.add(vecino)
+            for vecino in self.graph.vecinos(nodo_actual):
+                if vecino.id not in visitados:
+                    visitados.add(vecino.id)
+                    arbol.agregar_nodo(vecino)
+                    arbol.agregar_arista(Arista(nodo_actual, vecino))
                     cola.append(vecino)
-                    orden.append(vecino)
-        return orden
 
-
+        return arbol

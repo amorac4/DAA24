@@ -130,14 +130,13 @@ def grafoGilbert(n, p, dirigido=False):
 # Genera un grafo aleatorio según el modelo geográfico.
 # Conecta nodos que se encuentran dentro de una distancia r en un plano unitario.
 def grafoGeografico(n, r, dirigido=False):
-    
     if n <= 0:
         raise ValueError("El número de nodos debe ser mayor que 0.")
     if not (0 < r <= 1):
         raise ValueError("La distancia r debe estar entre 0 y 1.")
     
     grafo = Grafo(dirigido)
-    posiciones = [(random.random(), random.random()) for _ in range(n)] # Asigna posiciones aleatorias a los nodos.
+    posiciones = [(random.random(), random.random()) for _ in range(n)]  # Asigna posiciones aleatorias a los nodos.
     nodos = [Nodo(i) for i in range(n)]
     
     for nodo in nodos:
@@ -146,12 +145,12 @@ def grafoGeografico(n, r, dirigido=False):
     # Conectar nodos cuya distancia euclidiana es menor o igual a r
     for i in range(n):
         for j in range(i + 1, n):
-             distancia = math.sqrt((posiciones[i][0] - posiciones[j][0]) ** 2 +
+            distancia = math.sqrt((posiciones[i][0] - posiciones[j][0]) ** 2 +
                                   (posiciones[i][1] - posiciones[j][1]) ** 2)
-             if distancia <= r:
+            if distancia <= r:
                 grafo.agregar_arista(Arista(nodos[i], nodos[j]))
-             if not dirigido:
-                    grafo.agregar_arista(Arista(nodos[j], nodos[i]))
+                if not dirigido:
+                    grafo.agregar_arista(Arista(nodos[j], nodos[i]))  # Agregar solo si el grafo es dirigido
 
     return grafo
 
