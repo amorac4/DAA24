@@ -62,17 +62,17 @@ def iniciar_busqueda():
         print("\nBusqueda en amplitud(BFS):")
         bfs = BFS(grafo)
         bfs.buscar(nodo_inicio)
-        resultados_busqueda(nombre, "BFS", bfs.visitados)
+        resultados_busqueda(nombre, "BFS", nodos_visitados)
 
         print("\nBusqueda en profundidad Recursiva (DFS RECURSIVO):")
         dfsR = DFS_Recursivo(grafo)
         dfsR.buscar(nodo_inicio)
-        resultados_busqueda(nombre, "DFS_R", dfsR.visitados)
+        resultados_busqueda(nombre, "DFS_R", nodos_visitados)
 
         print("\nBusqueda en profundidad iterativa(DFS ITERATIVO):")
         dfsI = DFS_ITERATIVO(grafo)
         dfsI.buscar(nodo_inicio)
-        resultados_busqueda(nombre, "DFS_I", dfsI.vsitados)
+        resultados_busqueda(nombre, "DFS_I", nodos_visitados)
 
 if __name__ == "__main__":
             iniciar_busqueda()
