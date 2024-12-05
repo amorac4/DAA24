@@ -144,7 +144,7 @@ class Grafo:
                 else:
                     print(f"No se encontraron nodos para la arista {n1_id} <-> {n2_id}")
 
-        print(f"Aristas en el grafo: {[(arista.n1.id, arista.n2.id, arista.peso) for arista in grafo.aristas]}")
+        #print(f"Aristas en el grafo: {[(arista.n1.id, arista.n2.id, arista.peso) for arista in grafo.aristas]}")
         return grafo
 
 
