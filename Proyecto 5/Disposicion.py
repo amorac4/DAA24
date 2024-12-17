@@ -8,25 +8,25 @@ from Cargador import cargarG
 from Visualizar import Visualizar
 from Spring import Spring
 
-ANCHO, ALTO = 800, 600  # Tamaño de la ventana
-RADIO = 5  # Radio de los nodos
+ANCHO, ALTO = 1200, 700  # Tamaño de la ventana
+RADIO = 2  # Radio de los nodos
 FPS = 30
-m500 = ""
+m500 = "grafo_malla_500.gv"
 m100 = "grafo_malla_100.gv"
-ba500 =""
+ba500 ="grafo_Barabási-Albert_500_no dirigido.gv"
 ba100 ="grafo_Barabási-Albert_100_no dirigido.gv"
-er500 =""
+er500 ="grafo_Erdös-Rényi_500_no dirigido.gv"
 er100 ="grafo_Erdös-Rényi_100_no dirigido.gv"
-geo500 =""
+geo500 ="grafo_Geográfico_500_no dirigido.gv"
 geo100 ="grafo_Geográfico_100_no dirigido.gv"
-gil500 =""
+gil500 ="grafo_Gilbert_500_no dirigido.gv"
 gil100 ="grafo_Gilbert_100_no dirigido.gv"
-do500 =""
+do500 ="grafo_Dorogovtsev-Mendes_500_no dirigido.gv"
 do100 ="grafo_Dorogovtsev-Mendes_100_no dirigido.gv"
 
 
 CARPETA = "/home/verzzul/Escritorio/DAA24/Proyecto 5/Grafos/"  # Ruta a la carpeta de grafos
-ARCHIVO_GRAFO = ba100  # Nombre del archivo .gv a cargar
+ARCHIVO_GRAFO = m100  # Nombre del archivo .gv a cargar
 
 
 def posiciones_iniciales_mixtas(nodos, ancho, alto):
@@ -66,7 +66,7 @@ def main():
     viz = Visualizar(ANCHO, ALTO, RADIO)
 
     # Configuración del algoritmo Spring
-    spring = Spring(grafo, posiciones, ANCHO, ALTO, repulsion=2, atraccion=0.01, amortiguacion=0.85)
+    spring = Spring(grafo, posiciones, ANCHO, ALTO, repulsion=1, atraccion=0.02, amortiguacion=0.85)
 
     # Configuración del archivo de video
     print(f"Guardando video como: {nombre_video}")

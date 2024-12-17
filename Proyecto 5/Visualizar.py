@@ -7,9 +7,9 @@ class Visualizar:
         self.radio = radio
         self.screen = pygame.display.set_mode((ancho, alto))
         pygame.display.set_caption("Visualización de Grafo")
-        self.fondo_color = (255, 255, 255)
-        self.arista_color = (0, 0, 0)
-        self.nodo_color = (0, 0, 255)
+        self.fondo_color = (0, 255, 255)
+        self.arista_color = (0, 255, 0)
+        self.nodo_color = (128, 0, 128)
 
     def dibujarG(self, grafo, posicion):
         self.screen.fill(self.fondo_color)
