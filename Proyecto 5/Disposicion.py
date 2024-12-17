@@ -68,7 +68,8 @@ def main():
     # Bucle principal: sigue iterando hasta que se cierre la ventana
     running = True
     clock = pygame.time.Clock()
-    video_salida = cv2.VideoWriter("grafodistribuido.mp4", cv2.VideoWriter_fourcc(*'mp4v'), FPS, (ANCHO, ALTO))
+    video_salida = cv2.VideoWriter("/home/verzzul/Escritorio/DAA24/Proyecto 5/Videos/salida_grafo.mp4", cv2.VideoWriter_fourcc(*'mp4v'), FPS, (ANCHO, ALTO))
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
