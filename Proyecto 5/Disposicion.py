@@ -1,6 +1,8 @@
 import pygame
 import math
 import random
+import cv2
+import numpy as np
 import os
 from Cargador import cargarG
 from Visualizar import Visualizar
@@ -8,8 +10,24 @@ from Spring import Spring
 
 ANCHO, ALTO = 800, 600  # Tamaño de la ventana
 RADIO = 5  # Radio de los nodos
+FPS = 30
+m500 = ""
+m100 = "grafo_malla_100.gv"
+ba500 =""
+ba100 ="grafo_Barabási-Albert_100_no dirigido.gv"
+er500 =""
+er100 ="grafo_Erdös-Rényi_100_no dirigido.gv"
+geo500 =""
+geo100 ="grafo_Geográfico_100_no dirigido.gv"
+gil500 =""
+gil100 ="grafo_Gilbert_100_no dirigido.gv"
+do500 =""
+do100 ="grafo_Dorogovtsev-Mendes_100_no dirigido.gv"
+
+
 CARPETA = "/home/verzzul/Escritorio/DAA24/Proyecto 5/Grafos/"  # Ruta a la carpeta de grafos
-ARCHIVO_GRAFO = "grafo_malla_100.gv"  # Nombre del archivo .gv a cargar
+ARCHIVO_GRAFO = do100  # Nombre del archivo .gv a cargar
+
 
 def posiciones_iniciales_mixtas(nodos, ancho, alto):
     """
@@ -49,6 +67,8 @@ def main():
 
     # Bucle principal: sigue iterando hasta que se cierre la ventana
     running = True
+    clock = pygame.time.Clock()
+    video_salida = cv2.VideoWriter("grafodistribuido.mp4", cv2.VideoWriter_fourcc(*'mp4v'), FPS, (ANCHO, ALTO))
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -56,8 +76,18 @@ def main():
 
         spring.run(iteraciones=1)  # Ejecuta el algoritmo Spring paso a paso
         viz.dibujarG(grafo, spring.posiciones)  # Redibuja el grafo
+        # Capturar la pantalla y guardar el fotograma en el video
+        captura = pygame.surfarray.array3d(pygame.display.get_surface())
+        captura = np.transpose(captura, (1, 0, 2))  # OpenCV necesita el formato correcto
+        video_salida.write(cv2.cvtColor(captura, cv2.COLOR_RGB2BGR))
+
+        clock.tick(FPS)
+
+    # Cerrar OpenCV y Pygame
+    video_salida.release()
 
     pygame.quit()
+    print("Video guardado como output.mp4")
 
 if __name__ == "__main__":
     main()
