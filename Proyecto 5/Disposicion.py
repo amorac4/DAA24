@@ -26,7 +26,7 @@ do100 ="grafo_Dorogovtsev-Mendes_100_no dirigido.gv"
 
 
 CARPETA = "/home/verzzul/Escritorio/DAA24/Proyecto 5/Grafos/"  # Ruta a la carpeta de grafos
-ARCHIVO_GRAFO = do100  # Nombre del archivo .gv a cargar
+ARCHIVO_GRAFO = ba100  # Nombre del archivo .gv a cargar
 
 
 def posiciones_iniciales_mixtas(nodos, ancho, alto):
@@ -51,9 +51,12 @@ def main():
     # Construir la ruta completa del archivo .gv
     ruta_archivo = os.path.join(CARPETA, ARCHIVO_GRAFO)
 
+    # Extraer el nombre base del grafo (sin la extensión) para el video
+    nombre_grafo = os.path.splitext(ARCHIVO_GRAFO)[0]
+    nombre_video = os.path.join("/home/verzzul/Escritorio/DAA24/Proyecto 5/Videos", f"{nombre_grafo}.mp4")
+
     # Cargar el grafo
     grafo = cargarG(ruta_archivo)
-
     if grafo is None:
         print("Error al cargar el grafo. Verifique la ruta y el archivo.")
         return
@@ -65,11 +68,13 @@ def main():
     # Configuración del algoritmo Spring
     spring = Spring(grafo, posiciones, ANCHO, ALTO, repulsion=2, atraccion=0.01, amortiguacion=0.85)
 
+    # Configuración del archivo de video
+    print(f"Guardando video como: {nombre_video}")
+    video_salida = cv2.VideoWriter(nombre_video, cv2.VideoWriter_fourcc(*'mp4v'), FPS, (ANCHO, ALTO))
+
     # Bucle principal: sigue iterando hasta que se cierre la ventana
     running = True
     clock = pygame.time.Clock()
-    video_salida = cv2.VideoWriter("/home/verzzul/Escritorio/DAA24/Proyecto 5/Videos/salida_grafo.mp4", cv2.VideoWriter_fourcc(*'mp4v'), FPS, (ANCHO, ALTO))
-
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -77,6 +82,7 @@ def main():
 
         spring.run(iteraciones=1)  # Ejecuta el algoritmo Spring paso a paso
         viz.dibujarG(grafo, spring.posiciones)  # Redibuja el grafo
+
         # Capturar la pantalla y guardar el fotograma en el video
         captura = pygame.surfarray.array3d(pygame.display.get_surface())
         captura = np.transpose(captura, (1, 0, 2))  # OpenCV necesita el formato correcto
@@ -86,9 +92,8 @@ def main():
 
     # Cerrar OpenCV y Pygame
     video_salida.release()
-
     pygame.quit()
-    print("Video guardado como output.mp4")
+    print(f"Video guardado como: {nombre_video}")
 
 if __name__ == "__main__":
     main()
