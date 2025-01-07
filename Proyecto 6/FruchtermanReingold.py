@@ -57,16 +57,11 @@ class FruchtermanReingold:
                 max(0, min(self.alto, y))
             )
     
-    def Run(self):
-        try:
-            while True:
+    def run(self, iteraciones=1):
+        for _ in range(iteraciones):
                 desp = self.CalRepulsion()
                 desp = self.CalAtraccion(desp)
                 self.ActuPos(desp)
 
-                # Introducir una pausa para evitar que el bucle sea demasiado rápido
-                time.sleep(0.01)
-        except KeyboardInterrupt:
-            print("Ejecución detenida por el usuario.")
 
 

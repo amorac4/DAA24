@@ -22,3 +22,13 @@ class Visualizar:
                                  (int(posicion[nodo2][0]), int(posicion[nodo2][1])), 1)
             except (TypeError, ValueError):
                 pass
+
+        # Dibuja los nodos
+        for nodo in grafo.nodes:
+            try:
+                x, y = posicion[nodo]
+                pygame.draw.circle(self.screen, self.nodo_color, (int(x), int(y)), self.radio)
+            except (TypeError, ValueError):
+                pass
+
+        pygame.display.flip()

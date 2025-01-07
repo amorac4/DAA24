@@ -6,25 +6,25 @@ import numpy as np
 import os
 from CargadorG import cargarG
 from Vizualizador import Visualizar
+from Spring import Spring
 from FruchtermanReingold import FruchtermanReingold
 
 ANCHO, ALTO = 1200, 700  # Tamaño de la ventana
 RADIO = 2  # Radio de los nodos
 FPS = 30
-
-# Lista de grafos disponibles
 m500 = "grafo_malla_500.gv"
 m100 = "grafo_malla_100.gv"
-ba500 = "grafo_Barabási-Albert_500_no dirigido.gv"
-ba100 = "grafo_Barabási-Albert_100_no dirigido.gv"
-er500 = "grafo_Erdös-Rényi_500_no dirigido.gv"
-er100 = "grafo_Erdös-Rényi_100_no dirigido.gv"
-geo500 = "grafo_Geográfico_500_no dirigido.gv"
-geo100 = "grafo_Geográfico_100_no dirigido.gv"
-gil500 = "grafo_Gilbert_500_no dirigido.gv"
-gil100 = "grafo_Gilbert_100_no dirigido.gv"
-do500 = "grafo_Dorogovtsev-Mendes_500_no dirigido.gv"
-do100 = "grafo_Dorogovtsev-Mendes_100_no dirigido.gv"
+ba500 ="grafo_Barabási-Albert_500_no dirigido.gv"
+ba100 ="grafo_Barabási-Albert_100_no dirigido.gv"
+er500 ="grafo_Erdös-Rényi_500_no dirigido.gv"
+er100 ="grafo_Erdös-Rényi_100_no dirigido.gv"
+geo500 ="grafo_Geográfico_500_no dirigido.gv"
+geo100 ="grafo_Geográfico_100_no dirigido.gv"
+gil500 ="grafo_Gilbert_500_no dirigido.gv"
+gil100 ="grafo_Gilbert_100_no dirigido.gv"
+do500 ="grafo_Dorogovtsev-Mendes_500_no dirigido.gv"
+do100 ="grafo_Dorogovtsev-Mendes_100_no dirigido.gv"
+
 
 CARPETA = "/home/verzzul/Escritorio/DAA24/Proyecto 5/Grafos/"  # Ruta a la carpeta de grafos
 ARCHIVO_GRAFO = m100  # Nombre del archivo .gv a cargar
@@ -48,27 +48,38 @@ def posiciones_iniciales_mixtas(nodos, ancho, alto):
         radio += espaciado
     return posiciones
 
-
 def main():
     # Construir la ruta completa del archivo .gv
     ruta_archivo = os.path.join(CARPETA, ARCHIVO_GRAFO)
 
     # Extraer el nombre base del grafo (sin la extensión) para el video
     nombre_grafo = os.path.splitext(ARCHIVO_GRAFO)[0]
-    nombre_video = os.path.join("/home/verzzul/Escritorio/DAA24/Proyecto 5/Videos", f"{nombre_grafo}.mp4")
+    nombre_video = os.path.join("/home/verzzul/Escritorio/DAA24/Proyecto 6/Videos", f"{nombre_grafo}.mp4")
 
     # Cargar el grafo
     grafo = cargarG(ruta_archivo)
     if grafo is None:
         print("Error al cargar el grafo. Verifique la ruta y el archivo.")
         return
+    
 
     # Inicialización de posiciones
     posiciones = posiciones_iniciales_mixtas(grafo.nodes, ANCHO, ALTO)
     viz = Visualizar(ANCHO, ALTO, RADIO)
 
-    # Configuración del algoritmo Fruchterman-Reingold
-    fruchterman = FruchtermanReingold(grafo, posiciones, ANCHO, ALTO, repulsion=500, atraccion=0.01, amortiguacion=0.9)
+    #seleccion de algoritmo
+    print("seleccionar el algoritmo de disposicion:")
+    print("1. Spring")
+    print("2. Fruchterman-Reingold")
+    opcion =input("Elija una opcion:")
+
+    if opcion == "1":
+        algoritmo = Spring(grafo, posiciones, ANCHO, ALTO, repulsion=1, atraccion=0.02, amortiguacion=0.85)
+    elif opcion == "2":
+        algoritmo = FruchtermanReingold(grafo, posiciones, ANCHO, ALTO, repulsion=30, atraccion=0.01, amortiguacion=0.9)
+    else:
+        print("opcion invalidad")
+        return
 
     # Configuración del archivo de video
     print(f"Guardando video como: {nombre_video}")
@@ -82,8 +93,8 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        fruchterman.Run()  # Ejecuta el algoritmo paso a paso
-        viz.dibujarG(grafo, fruchterman.posiciones)  # Redibuja el grafo
+        algoritmo.run(iteraciones=1)  # Ejecuta el algoritmo Spring paso a paso
+        viz.dibujarG(grafo, algoritmo.posiciones)  # Redibuja el grafo
 
         # Capturar la pantalla y guardar el fotograma en el video
         captura = pygame.surfarray.array3d(pygame.display.get_surface())
@@ -96,7 +107,6 @@ def main():
     video_salida.release()
     pygame.quit()
     print(f"Video guardado como: {nombre_video}")
-
 
 if __name__ == "__main__":
     main()
