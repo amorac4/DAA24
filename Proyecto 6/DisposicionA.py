@@ -8,6 +8,7 @@ from CargadorG import cargarG
 from Vizualizador import Visualizar
 from Spring import Spring
 from FruchtermanReingold import FruchtermanReingold
+from BarnesHut import BarnesHut
 
 ANCHO, ALTO = 1200, 700  # Tamaño de la ventana
 RADIO = 2  # Radio de los nodos
@@ -71,12 +72,17 @@ def main():
     print("seleccionar el algoritmo de disposicion:")
     print("1. Spring")
     print("2. Fruchterman-Reingold")
+    print("3. Barnes-Hut")
     opcion =input("Elija una opcion:")
 
     if opcion == "1":
         algoritmo = Spring(grafo, posiciones, ANCHO, ALTO, repulsion=1, atraccion=0.02, amortiguacion=0.85)
     elif opcion == "2":
         algoritmo = FruchtermanReingold(grafo, posiciones, ANCHO, ALTO, repulsion=30, atraccion=0.01, amortiguacion=0.9)
+    elif opcion == "3":
+        algoritmo = BarnesHut(0, ANCHO, 0, ALTO, theta=0.5)
+        objetos = [(nodo, posiciones[nodo][0], posiciones[nodo][1])for nodo in grafo.nodes]
+        algoritmo.construirQ(objetos)
     else:
         print("opcion invalidad")
         return
@@ -93,7 +99,11 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        algoritmo.run(iteraciones=1)  # Ejecuta el algoritmo Spring paso a paso
+        if opcion == "3":
+            posiciones = algoritmo.ActuPos(grafo.nodes, posiciones)
+        else:
+            algoritmo.run(iteraciones=1)  # Ejecuta el algoritmo Selecionado paso a paso
+        
         viz.dibujarG(grafo, algoritmo.posiciones)  # Redibuja el grafo
 
         # Capturar la pantalla y guardar el fotograma en el video
