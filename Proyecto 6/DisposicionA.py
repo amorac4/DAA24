@@ -11,7 +11,7 @@ from FruchtermanReingold import FruchtermanReingold
 from BarnesHut import BarnesHut
 
 ANCHO, ALTO = 1200, 700  # Tamaño de la ventana
-RADIO = 2  # Radio de los nodos
+RADIO = 4  # Radio de los nodos
 FPS = 30
 m500 = "grafo_malla_500.gv"
 m100 = "grafo_malla_100.gv"
@@ -63,6 +63,9 @@ def main():
         print("Error al cargar el grafo. Verifique la ruta y el archivo.")
         return
     
+    pygame.init()
+    pantalla = pygame.display.set_mode((ANCHO, ALTO))
+    pygame.display.set_caption("Disposición del Grafo")
 
     # Inicialización de posiciones
     posiciones = posiciones_iniciales_mixtas(grafo.nodes, ANCHO, ALTO)
@@ -80,8 +83,8 @@ def main():
     elif opcion == "2":
         algoritmo = FruchtermanReingold(grafo, posiciones, ANCHO, ALTO, repulsion=30, atraccion=0.01, amortiguacion=0.9)
     elif opcion == "3":
-        algoritmo = BarnesHut(0, ANCHO, 0, ALTO, theta=0.5)
-        objetos = [(nodo, posiciones[nodo][0], posiciones[nodo][1])for nodo in grafo.nodes]
+        algoritmo = BarnesHut(0, ANCHO, 0, ALTO, theta=0.5, repulsion=450,atraccion=0.8 , min_distancia=5)
+        objetos = {nodo: (posiciones[nodo][0], posiciones[nodo][1]) for nodo in grafo.nodes}
         algoritmo.construirQ(objetos)
     else:
         print("opcion invalidad")
@@ -98,13 +101,24 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                
+        pantalla.fill((0, 255, 255))
 
         if opcion == "3":
-            posiciones = algoritmo.ActuPos(grafo.nodes, posiciones)
+            posiciones = algoritmo.ActuPos(grafo, posiciones)
+
         else:
             algoritmo.run(iteraciones=1)  # Ejecuta el algoritmo Selecionado paso a paso
         
         viz.dibujarG(grafo, algoritmo.posiciones)  # Redibuja el grafo
+
+         # Dibuja el Quadtree (opcional para depuración)
+        if opcion == "3":  # Solo si se está usando Barnes-Hut
+            algoritmo.dibujar_quadtree(pantalla)
+
+        # Actualiza la ventana
+        pygame.display.flip()
+        
 
         # Capturar la pantalla y guardar el fotograma en el video
         captura = pygame.surfarray.array3d(pygame.display.get_surface())

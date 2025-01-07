@@ -1,3 +1,4 @@
+import pygame
 class QuadtreeNode:
     def __init__(self, x_min, x_max, y_min, y_max):
        
@@ -9,6 +10,7 @@ class QuadtreeNode:
         self.objetos = []  # Nodos almacenados en este espacio
         self.centro_masa = None
         self.total_masa = 0
+        self.dividido = False
 
     def insertar(self, objeto, x, y):
         
@@ -45,7 +47,8 @@ class QuadtreeNode:
                 if hijo.contiene(x, y):
                     hijo.insertar(objeto, x, y)
 
-        self.objetos = []
+        self.objetos = []  # Vacía los objetos del nodo actual
+        self.dividido = True  # Marca el nodo como subdividido
 
     def calcular_centro_masa(self):
         
@@ -73,3 +76,18 @@ class QuadtreeNode:
                 self.centro_masa = (x_total / self.total_masa, y_total / self.total_masa)
             else:
                 self.centro_masa = (0, 0)
+
+    def dibujar(self, pantalla):
+      
+        color = (200, 200, 200)  # Verde para los límites del Quadtree
+        # Dibuja el rectángulo de este nodo
+        pygame.draw.rect(
+            pantalla, color,
+            pygame.Rect(self.x_min, self.y_min, self.x_max - self.x_min, self.y_max - self.y_min),
+            1  # Grosor de la línea
+        )
+
+        # Si tiene hijos, llama recursivamente para dibujar sus límites
+        if self.dividido:
+            for hijo in self.hijos:
+                hijo.dibujar(pantalla)
