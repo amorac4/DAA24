@@ -11,7 +11,7 @@ from FruchtermanReingold import FruchtermanReingold
 from BarnesHut import BarnesHut
 
 ANCHO, ALTO = 1200, 700  # Tamaño de la ventana
-RADIO = 4  # Radio de los nodos
+RADIO = 2  # Radio de los nodos
 FPS = 30
 m500 = "grafo_malla_500.gv"
 m100 = "grafo_malla_100.gv"
@@ -28,7 +28,7 @@ do100 ="grafo_Dorogovtsev-Mendes_100_no dirigido.gv"
 
 
 CARPETA = "/home/verzzul/Escritorio/DAA24/Proyecto 5/Grafos/"  # Ruta a la carpeta de grafos
-ARCHIVO_GRAFO = m100  # Nombre del archivo .gv a cargar
+ARCHIVO_GRAFO = ba500  # Nombre del archivo .gv a cargar
 
 
 def posiciones_iniciales_mixtas(nodos, ancho, alto):
@@ -55,8 +55,9 @@ def main():
 
     # Extraer el nombre base del grafo (sin la extensión) para el video
     nombre_grafo = os.path.splitext(ARCHIVO_GRAFO)[0]
-    nombre_video = os.path.join("/home/verzzul/Escritorio/DAA24/Proyecto 6/Videos", f"{nombre_grafo}.mp4")
-
+   
+  
+   
     # Cargar el grafo
     grafo = cargarG(ruta_archivo)
     if grafo is None:
@@ -79,17 +80,25 @@ def main():
     opcion =input("Elija una opcion:")
 
     if opcion == "1":
-        algoritmo = Spring(grafo, posiciones, ANCHO, ALTO, repulsion=1, atraccion=0.02, amortiguacion=0.85)
+        algoritmo = Spring(grafo, posiciones, ANCHO, ALTO, repulsion=250, atraccion=0.02, amortiguacion=0.85)
+        nombre = "spring"
     elif opcion == "2":
-        algoritmo = FruchtermanReingold(grafo, posiciones, ANCHO, ALTO, repulsion=30, atraccion=0.01, amortiguacion=0.9)
+        algoritmo = FruchtermanReingold(grafo, posiciones, ANCHO, ALTO, repulsion=200, atraccion=0.02, amortiguacion=.9)
+        nombre = "FruchtermanRein"
     elif opcion == "3":
-        algoritmo = BarnesHut(0, ANCHO, 0, ALTO, theta=0.5, repulsion=450,atraccion=0.8 , min_distancia=5)
+        algoritmo = BarnesHut(0, ANCHO, 0, ALTO, theta=1, repulsion=600,atraccion=0.09 , min_distancia=.5)
         objetos = {nodo: (posiciones[nodo][0], posiciones[nodo][1]) for nodo in grafo.nodes}
         algoritmo.construirQ(objetos)
+        nombre = "BarnesHut"
+
     else:
         print("opcion invalidad")
         return
-
+ # Incluye el nombre del algoritmo en el archivo de salida
+    nombre_video = os.path.join(
+        "/home/verzzul/Escritorio/DAA24/Proyecto 6/Videos",
+        f"{nombre_grafo}_{nombre}.mp4"
+    )
     # Configuración del archivo de video
     print(f"Guardando video como: {nombre_video}")
     video_salida = cv2.VideoWriter(nombre_video, cv2.VideoWriter_fourcc(*'mp4v'), FPS, (ANCHO, ALTO))
