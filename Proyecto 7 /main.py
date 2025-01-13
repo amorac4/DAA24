@@ -7,6 +7,11 @@ from ifft import IFFT
 from ProcesadorAudio import procesAudio
 from filtro import Filtro
 
+def normalizar_audio(datos):
+    datos_normalizados = datos / np.max(np.abs(datos))  # Escalar a rango [-1, 1]
+    datos_normalizados = (datos_normalizados * 32767).astype(np.int16)  # Escalar a rango int16
+    return datos_normalizados
+
 def main():
     # Rutas de archivos
     audio_entrada = "/home/verzzul/Escritorio/DAA24/Proyecto 7 /Entrada/Guitarra.mp3"
@@ -29,6 +34,7 @@ def main():
 
         # Leer archivo de audio
         datos_audio, tasa_muestreo = procesAudio.leer_audio(audio_entrada)
+        len_original = len(datos_audio)  # Guardar la longitud original
 
         # Validar datos de audio
         if len(datos_audio) == 0:
@@ -36,11 +42,13 @@ def main():
 
         # Preparar datos: convertir a float y rellenar si es necesario
         datos_audio = np.array(datos_audio, dtype=float)
-        datos_audio = procesAudio.rellenar_potencia(datos_audio)
-        n = len(datos_audio)
+        datos_rellenados = procesAudio.rellenar_potencia(datos_audio)  # Relleno para FFT
+        n = len(datos_rellenados)
+
+        print(f"Longitud original: {len_original}, Longitud después del relleno: {n}")
 
         # Realizar la FFT
-        frecuencias = FFT.fft(n, datos_audio)
+        frecuencias = FFT.fft(n, datos_rellenados)
 
         # Graficar las frecuencias
         magnitud = np.abs(frecuencias)
@@ -53,12 +61,22 @@ def main():
         plt.show()
 
         # Aplicar filtro pasabajas
-        frecuencia_corte = 1000  # Frecuencia de corte en Hz
+        frecuencia_corte = 5000  # Frecuencia de corte ajustada
         frecuencias_filtradas = Filtro.filtro_pasabajas(frecuencias, frecuencia_corte, tasa_muestreo)
 
         # Reconstruir señal con la IFFT
         señal_reconstruida = IFFT.ifft(n, frecuencias_filtradas)
         señal_reconstruida = np.real(señal_reconstruida)
+
+        print(f"Longitud después de la IFFT (antes del recorte): {len(señal_reconstruida)}")
+
+        # Recortar al tamaño original
+        señal_reconstruida = señal_reconstruida[:len_original]
+
+        print(f"Longitud después del recorte: {len(señal_reconstruida)}")
+
+        # Normalizar la señal reconstruida
+        señal_reconstruida = normalizar_audio(señal_reconstruida)
 
         # Guardar la señal reconstruida en WAV
         procesAudio.escribir_audio(audio_salida_wav, señal_reconstruida, tasa_muestreo)
