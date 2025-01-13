@@ -1,7 +1,7 @@
 import cmath
 
 class FFT:
-
+#fft
     def fft (n, a):
         
         if n == 1:
@@ -14,7 +14,7 @@ class FFT:
             omega_k = cmath.exp(-2j * cmath.pi * k / n)
             resultado[k] = pares[k] + omega_k * impares[k]
             resultado[k + n // 2] = pares[k] - omega_k * impares [k]
-            
+
         return resultado
     
 

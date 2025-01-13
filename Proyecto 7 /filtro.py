@@ -1,5 +1,6 @@
 class Filtro:
 
+#Filtro pasabajas
     def filtro_pasabajas(frecuencias, frecuencia_corte, tasa_muestreo):
         filtrado = []
         n =len(frecuencias)

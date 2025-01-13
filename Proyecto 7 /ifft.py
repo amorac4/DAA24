@@ -1,7 +1,8 @@
 import cmath
 
-class IFFT:
 
+class IFFT:
+#fft inverso
     def ifft (n, a):
         
         if n == 1:
